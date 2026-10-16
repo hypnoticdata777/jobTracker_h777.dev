@@ -1,0 +1,12 @@
+{
+  "name": "jobtracker-monorepo",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ],
+  "scripts": {
+    "install-all": "npm install --workspaces"
+  }
+}
