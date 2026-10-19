@@ -9,7 +9,7 @@ This is the backend-first Phase 1 scaffold for the Job Tracker app.
 - Zod request validation
 
 ## Purpose
-This repository currently contains the backend foundation for an authenticated job tracker. The frontend will be added in a later phase. The database is PostgreSQL running locally via Docker Compose, while Node runs natively on the machine for fast local development.
+This repository currently contains the backend foundation for an authenticated job tracker. The frontend will be added in a later phase. The database is PostgreSQL running locally via Docker Compose.
 
 ## Local development
 
@@ -35,7 +35,24 @@ npx prisma generate
 npx prisma migrate dev --name init
 ```
 
-### 4) Start backend dev server
+### 4) Run seed data
+
+A seed script is included to create one test user (alice@example.com) and three sample jobs.
+
+```bash
+cd backend
+# optionally set SEED_PASSWORD in the env or use default 'Passw0rd!'
+SEED_PASSWORD="Passw0rd!" npx ts-node --transpile-only prisma/seed.ts
+```
+
+or with npx (no install):
+
+```bash
+cd backend
+SEED_PASSWORD="Passw0rd!" npx ts-node --transpile-only prisma/seed.ts
+```
+
+### 5) Start backend dev server
 
 ```bash
 cd backend
@@ -55,6 +72,23 @@ JWT_EXPIRES_IN="7d"
 PORT=4000
 FRONTEND_ORIGIN="http://localhost:5173"
 ```
+
+## Database verification
+
+If you want to verify the database directly with psql after running the migration, use:
+
+```bash
+# connect to the jobtracker_dev database
+psql postgresql://jobtracker:password@localhost:5432/jobtracker_dev
+# list tables
+\dt
+# describe users table
+\d "User"
+# describe jobs table
+\d "Job"
+```
+
+A SQL export of the schema is available at `backend/database/schema.sql` for inspection.
 
 ## API routes
 
