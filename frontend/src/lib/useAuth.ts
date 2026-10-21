@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import api from './api'
+import { getCurrentUser } from '../services/authService'
 
 export default function useAuth() {
-  const { data, isLoading } = useQuery(['me'], async () => {
-    const res = await api.get('/api/auth/me')
-    return res.data
-  }, { retry: false })
+  const { data, isLoading } = useQuery({
+    queryKey: ['me'],
+    queryFn: getCurrentUser,
+    retry: false,
+  })
 
   return { user: data, isLoading }
 }
