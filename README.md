@@ -1,6 +1,19 @@
 # Job Tracker (h777.dev)
 
-This is the backend-first Phase 1 scaffold for the Job Tracker app.
+This repository contains an early Job Tracker MVP with a React frontend and Express API. Runtime verification is still pending.
+
+## Installation stabilization
+
+See [the phased plan](docs/setup/installation-plan.md) and [phase one session record](docs/sessions/2026-11-12-installation-phase-1.md).
+
+Use Node 24.22.1 (`nvm use`) and npm 11.9.0. From the repository root:
+
+```bash
+npm ci
+npm run prisma:generate --workspace backend
+```
+
+This installs all three workspaces using the root lockfile. Database initialization, production builds, and browser flows are covered by later phases; the legacy instructions below reference seed/SQL files that are currently missing.
 
 ## Stack
 - TypeScript + Express + Prisma + PostgreSQL

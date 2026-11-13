@@ -79,7 +79,7 @@ export default function Dashboard() {
             onClick={() => logoutMutation.mutate()}
             className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
           >
-            {logoutMutation.isPending ? 'Logging out...' : 'Log out'}
+            {logoutMutation.isLoading ? 'Logging out...' : 'Log out'}
           </button>
         </div>
       </header>
@@ -168,10 +168,10 @@ export default function Dashboard() {
               </button>
               <button
                 type="submit"
-                disabled={createMutation.isPending}
+                disabled={createMutation.isLoading}
                 className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {createMutation.isPending ? 'Saving...' : 'Save job'}
+                {createMutation.isLoading ? 'Saving...' : 'Save job'}
               </button>
             </div>
           </form>

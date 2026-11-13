@@ -8,5 +8,10 @@
   ],
   "scripts": {
     "install-all": "npm install --workspaces"
-  }
+  },
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
+  },
+  "packageManager": "npm@11.9.0"
 }

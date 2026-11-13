@@ -1,3 +1,7 @@
+# Current stabilization work
+
+Follow [the installation stabilization plan](docs/setup/installation-plan.md). Historical checkboxes below are not verified completion evidence; in particular, the referenced seed and SQL export are absent.
+
 # Plan and status
 
 This repository holds the backend-first Phase 1 scaffold for the Job Tracker app. Use this PLAN to track completed items, remaining Phase 1 tasks and the upcoming Phase 2 database tasks.
