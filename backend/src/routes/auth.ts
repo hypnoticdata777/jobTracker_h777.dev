@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 import argon2 from 'argon2';
-import jwt from 'jsonwebtoken';
+import jwt, { type SignOptions } from 'jsonwebtoken';
 import { z } from 'zod';
 import { prisma } from '../db';
 import { loginSchema, registerSchema } from '../lib/validation';
@@ -77,7 +77,8 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     }
 
     const jwtSecret = process.env.JWT_SECRET ?? 'development-secret';
-    const expiresIn = process.env.JWT_EXPIRES_IN ?? '7d';
+    // JWT_EXPIRES_IN is a duration string such as '7d'; jsonwebtoken types it more narrowly than `string`.
+    const expiresIn = (process.env.JWT_EXPIRES_IN ?? '7d') as SignOptions['expiresIn'];
 
     const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn });
 
