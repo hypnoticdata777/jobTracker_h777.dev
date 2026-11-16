@@ -10,11 +10,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["../shared/src/*"]
-    }
+    "resolveJsonModule": true
   },
   "include": ["src"]
 }
