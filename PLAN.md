@@ -16,11 +16,12 @@ Works when: on a fresh clone, `npm ci && npm run build` passes, and
 
 ## M0.5 — Deployed skeleton
 
-- [ ] Split `backend/src/index.ts` into `app.ts` (exports the app) and `server.ts` (listens).
-- [ ] Frontend calls relative `/api`; Vite dev proxy forwards it to the API.
+- [x] Split `backend/src/index.ts` into `app.ts` (exports the app) and `server.ts` (listens).
+- [x] Frontend calls relative `/api`; Vite dev proxy forwards it to the API.
 - [ ] Hosted PostgreSQL with a pooled connection string.
-- [ ] One Vercel project serving the frontend and the API on the same origin.
-- [ ] Fail at startup when `JWT_SECRET` is missing.
+- [x] Vercel configuration for one project serving the frontend and the API on the same origin.
+- [ ] First deployment succeeds.
+- [x] Fail at startup when `JWT_SECRET` is missing.
 
 Works when: register and login succeed on the public URL.
 

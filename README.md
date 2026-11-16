@@ -55,8 +55,7 @@ npm run db:seed
 npm run dev
 ```
 
-The frontend runs on http://localhost:5173 and the API on
-http://localhost:4000. Log in with the seeded account `demo@example.com` /
+Open http://localhost:5173. Log in with the seeded account `demo@example.com` /
 `Passw0rd!` (override the password with `SEED_PASSWORD` when seeding).
 
 ## Commands
@@ -72,6 +71,7 @@ Run all of these from the repository root.
 | `npm run db:deploy` | Apply committed migrations |
 | `npm run db:migrate` | Create a new migration after editing `schema.prisma` |
 | `npm run db:seed` | Reset the demo user and its sample jobs |
+| `npm run vercel-build` | What Vercel runs: apply migrations, then build |
 
 ## Environment variables
 
@@ -79,11 +79,29 @@ Set in `backend/.env` (see `backend/.env.example`).
 
 | Variable | Purpose |
 |---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `JWT_SECRET` | Secret used to sign session tokens |
-| `JWT_EXPIRES_IN` | Token lifetime, for example `7d` |
-| `PORT` | API port, default `4000` |
-| `FRONTEND_ORIGIN` | Origin allowed by CORS, default `http://localhost:5173` |
+| `DATABASE_URL` | PostgreSQL connection string used by the running app (pooled in production) |
+| `DATABASE_URL_UNPOOLED` | Direct PostgreSQL connection used by migrations; same as `DATABASE_URL` locally |
+| `JWT_SECRET` | Secret used to sign session tokens, at least 16 characters. The API refuses to start without it |
+| `JWT_EXPIRES_IN` | Token lifetime, default `7d` |
+| `PORT` | Local API port, default `4000` |
+
+## How requests are routed
+
+The browser only ever calls relative `/api/...` paths, so the page and the API
+share one origin and the session cookie needs no cross-site configuration.
+
+- **Local:** Vite serves the frontend on port 5173 and proxies `/api` to the
+  API on port 4000 (`frontend/vite.config.ts`).
+- **Vercel:** the built frontend is served as static files and `/api/*` is
+  rewritten to one function, `api/index.ts`, which runs the same Express app
+  (`vercel.json`).
+
+## Deployment (Vercel + Neon)
+
+One Vercel project, with a Neon PostgreSQL database attached through the
+Vercel Marketplace. The Neon integration provides `DATABASE_URL` and
+`DATABASE_URL_UNPOOLED`; add `JWT_SECRET` by hand. Each deployment runs
+`npm run vercel-build`, which applies pending migrations and then builds.
 
 ## API routes
 
