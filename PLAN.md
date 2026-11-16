@@ -1,107 +1,63 @@
-# Current stabilization work
+# Plan
 
-Follow [the installation stabilization plan](docs/setup/installation-plan.md). Historical checkboxes below are not verified completion evidence; in particular, the referenced seed and SQL export are absent.
+Goal and the MVP 1 checklist live in [README.md](README.md). This file tracks
+the order of work. Each milestone has a "works when" test; it is not done
+until that test passes.
 
-# Plan and status
+## M0 — Green baseline (done)
 
-This repository holds the backend-first Phase 1 scaffold for the Job Tracker app. Use this PLAN to track completed items, remaining Phase 1 tasks and the upcoming Phase 2 database tasks.
+- [x] Both production builds pass.
+- [x] Initial migration and repeatable seed committed.
+- [x] Unused code and dependencies removed.
+- [x] Root `dev`, `build`, `typecheck` and database scripts.
 
-## Phase 1 — completed items
-- [x] Scaffold the backend (TypeScript + Express + Prisma).
-- [x] Folder structure for backend (routes, middleware, db, prisma schema).
-- [x] Docker Compose for PostgreSQL (docker-compose.yml).
-- [x] README.md documenting local steps and API endpoints.
-- [x] Initialize Git / GitHub repo.
-- [x] Frontend scaffold (Vite + React) and Tailwind basic config.
+Works when: on a fresh clone, `npm ci && npm run build` passes, and
+`npm run db:deploy && npm run db:seed` gives a demo user who can log in.
 
-## Phase 1 — remaining items (now completed by this commit)
-- [x] PLAN.md (this file).
-- [x] Prisma seed script (backend/prisma/seed.ts).
-- [x] SQL schema export for inspection (backend/database/schema.sql).
-- [x] Optional pg Pool helper (backend/src/config/database.ts).
-- [x] README updates with DB verification & seed instructions.
+## M0.5 — Deployed skeleton
 
-## Phase 2 — roadmap for the next product milestones
+- [ ] Split `backend/src/index.ts` into `app.ts` (exports the app) and `server.ts` (listens).
+- [ ] Frontend calls relative `/api`; Vite dev proxy forwards it to the API.
+- [ ] Hosted PostgreSQL with a pooled connection string.
+- [ ] One Vercel project serving the frontend and the API on the same origin.
+- [ ] Fail at startup when `JWT_SECRET` is missing.
 
-### 1) MVP UI flow
-- [ ] Verify login/register flow works end-to-end with the backend.
-- [ ] Add redirect logic and successful auth onboarding.
-- [ ] Add logout action and session cleanup.
-- [ ] Add dashboard header, nav, and user context.
-- [ ] Add consistent loading, empty, and error states.
-- [ ] Add a simple Add Job flow from the dashboard.
-- [ ] Add basic job editing and deletion UX.
+Works when: register and login succeed on the public URL.
 
-### 2) Backend integration
-- [ ] Centralize auth and job API calls in service modules.
-- [ ] Add typed request/response models for frontend consumption.
-- [ ] Implement consistent API error handling for 400/401/500 responses.
-- [ ] Use React Query invalidation after create/update/delete actions.
-- [ ] Confirm cookie-based auth works across frontend/backend origins.
+## M1 — It is a tracker
 
-### 3) Data model expansion
-- [ ] Expand Job model with status, source, url, notes, and timestamps.
-- [ ] Add Contact model for recruiters and hiring managers.
-- [ ] Add Interview model with scheduling and outcome tracking.
-- [ ] Add Activity/Timeline model for application updates.
-- [ ] Add JobStatusHistory to capture workflow transitions.
+- [ ] Merge `Job` and `Application` into one model with a `status` enum,
+      `notes`, `appliedAt`, `updatedAt` and `statusChangedAt`.
+- [ ] `PATCH` and `DELETE` routes that always filter by the owner.
+- [ ] Status control on each card, edit form, delete.
 
-### 4) Job management UX
-- [ ] Add search and filtering by title/company/status.
-- [ ] Add sorting for recency, company, and priority.
-- [ ] Add status chips: Applied, Interviewing, Offer, Rejected, Archived.
-- [ ] Add job cards with status, updated date, and next action.
-- [ ] Add job detail pane or modal for editing.
-- [ ] Add quick notes and follow-up reminders.
+Works when: an application can be moved from Saved to Offer and deleted, and a
+second user cannot read or change it.
 
-### 5) Interviews, contacts, and workflow features beyond the core job tracker
-- [ ] Add interview scheduling and preparation notes.
-- [ ] Add recruiter/hiring manager contact management.
-- [ ] Add activity timeline for each job.
-- [ ] Add pipeline analytics: response rate, time-to-interview, source effectiveness.
-- [ ] Add a future ML layer for role-fit scoring and resume recommendations.
+## M2 — Trust
 
-## Phase 2 (high level)
-- Verify database tables and seed data.
-- Confirm frontend login/register/dashboard flow.
-- Wire frontend to API endpoints and implement job list, create, update.
-- Add interviews, contacts, activities, analytics_snapshots and ML models.
+- [ ] API integration tests (auth, validation, isolation between users).
+- [ ] CI: install, typecheck, build, test.
+- [ ] Error handling: 4xx for bad input, generic 500 body, request logging.
+- [ ] Input hardening: lowercase emails, `http(s)`-only URLs, length limits.
+- [ ] UI: show form errors, link login and register, fix blank-name register.
 
-## How to run (summary)
-1) Start Postgres
+Works when: a pull request with a broken build or a failing test goes red.
 
-```bash
-docker compose up -d
-```
+## M3 — Demo polish
 
-2) Backend
+- [ ] Group or filter by status, with counts.
+- [ ] Realistic seed data and a demo login.
+- [ ] README screenshot.
 
-```bash
-cd backend
-cp .env.example .env
-npm install
-npx prisma generate
-npx prisma migrate dev --name init
-SEED_PASSWORD="Passw0rd!" npx ts-node --transpile-only prisma/seed.ts
-npm run dev
-```
+Works when: a stranger completes the MVP flow with no help.
 
-3) Frontend
+## Not yet
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## Recommended product sequence
-The highest-value order for this app is:
-1. Auth + job CRUD
-2. Job states + filters
-3. Interview tracking
-4. Contact management
-5. Activity timeline
-6. Analytics
-7. ML recommendations last
-
-This keeps the app useful while avoiding premature complexity.
+| Item | Revisit when |
+|---|---|
+| Contacts, interviews, activity timeline, full status history | After two weeks of daily use show the need |
+| Analytics and ML recommendations | There are 50+ real rows |
+| Shared frontend/backend schema package | The frontend validates with Zod |
+| OAuth, password reset, refresh tokens | There are real users besides the author |
+| Drag-and-drop board | After the expo |
