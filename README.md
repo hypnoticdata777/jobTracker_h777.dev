@@ -6,19 +6,19 @@ glance where everything stands.
 
 ## Status
 
-Milestone M0 (green baseline) is complete: a fresh clone installs, builds,
-migrates, seeds and runs. The app can register, log in, list jobs and add a
-job. It does not track status yet; that is M1. See [PLAN.md](PLAN.md).
+M0 (green baseline), M0.5 (deployed on Vercel with Neon) and M1 (status, edit
+and delete) are complete. Next is M2: tests, CI and error handling. See
+[PLAN.md](PLAN.md).
 
 ## MVP 1 is done when
 
 - [x] A fresh clone installs, builds, migrates and seeds with the commands below.
 - [x] A user can register, log in, log out, add a job and see their own jobs.
-- [ ] A job has a status, and the user can change it.
-- [ ] A user can edit and delete a job.
+- [x] A job has a status, and the user can change it.
+- [x] A user can edit and delete a job.
 - [ ] The list can be grouped or filtered by status.
 - [ ] API tests cover auth, validation and isolation between users, and run in CI.
-- [ ] The app is deployed at a public URL.
+- [x] The app is deployed at a public URL.
 
 ## Stack
 
@@ -116,6 +116,11 @@ to Production alone.
 | GET | `/api/auth/me` | yes | Current user |
 | GET | `/api/jobs` | yes | List the current user's jobs |
 | POST | `/api/jobs` | yes | Create a job |
+| PATCH | `/api/jobs/:id` | yes | Update any fields of one of the current user's jobs |
+| DELETE | `/api/jobs/:id` | yes | Delete one of the current user's jobs |
+
+A job's `status` is one of `SAVED`, `APPLIED`, `INTERVIEWING`, `OFFER`,
+`REJECTED` or `ARCHIVED`. A job that belongs to another user answers 404.
 
 ## Project docs
 
