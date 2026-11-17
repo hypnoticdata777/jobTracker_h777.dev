@@ -3,32 +3,35 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/server.js",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^5.9.0",
     "argon2": "^0.41.1",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.13.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.8",
-    "@types/cors": "^2.8.5",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^22.10.2",
-    "@types/pg": "^8.11.10",
     "prisma": "^5.9.0",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2"
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }

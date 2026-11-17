@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import argon2 from 'argon2';
-import jwt from 'jsonwebtoken';
-import { z } from 'zod';
+import jwt, { type SignOptions } from 'jsonwebtoken';
+import { env } from '../config/env';
 import { prisma } from '../db';
 import { loginSchema, registerSchema } from '../lib/validation';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth';
@@ -76,15 +76,15 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    const jwtSecret = process.env.JWT_SECRET ?? 'development-secret';
-    const expiresIn = process.env.JWT_EXPIRES_IN ?? '7d';
+    // JWT_EXPIRES_IN is a duration string such as '7d'; jsonwebtoken types it more narrowly than `string`.
+    const expiresIn = env.JWT_EXPIRES_IN as SignOptions['expiresIn'];
 
-    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn });
+    const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, { expiresIn });
 
     res.cookie('auth_token', token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 

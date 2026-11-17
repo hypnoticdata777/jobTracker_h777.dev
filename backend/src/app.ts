@@ -1,22 +1,15 @@
 import express from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
+import './config/env';
 import { authRouter } from './routes/auth';
 import { jobsRouter } from './routes/jobs';
 
-dotenv.config();
+// Builds the Express app without starting a server, so the same app can be
+// started locally (server.ts), mounted as a serverless function (api/index.ts)
+// or driven directly by tests.
+export const app = express();
 
-const app = express();
-const port = Number(process.env.PORT ?? 4000);
-
-app.use(
-  cors({
-    origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173',
-    credentials: true,
-  }),
-);
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 
 app.get('/api/health', (_req, res) => {
@@ -37,6 +30,4 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(port, () => {
-  console.log(`Job Tracker backend running on http://localhost:${port}`);
-});
+export default app;

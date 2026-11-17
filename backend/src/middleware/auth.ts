@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 import { prisma } from '../db';
 
 export interface AuthenticatedRequest extends Request {
@@ -19,8 +20,7 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
   }
 
   try {
-    const secret = process.env.JWT_SECRET ?? 'development-secret';
-    const payload = jwt.verify(token, secret) as { userId: number };
+    const payload = jwt.verify(token, env.JWT_SECRET) as { userId: number };
 
     prisma.user
       .findUnique({
