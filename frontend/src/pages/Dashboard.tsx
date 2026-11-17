@@ -1,37 +1,48 @@
 import React, { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { logoutUser } from '../services/authService'
-import { createJob, getJobs } from '../services/jobService'
+import JobCard from '../components/JobCard'
+import JobForm from '../components/JobForm'
+import { getErrorMessage } from '../lib/errors'
 import useAuth from '../lib/useAuth'
-
-const emptyForm = {
-  title: '',
-  company: '',
-  location: '',
-  description: '',
-  url: '',
-}
+import { logoutUser } from '../services/authService'
+import { createJob, deleteJob, getJobs, updateJob } from '../services/jobService'
+import type { Job, JobInput } from '../types/job'
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user } = useAuth()
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [form, setForm] = useState(emptyForm)
+  const [isCreating, setIsCreating] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  // Errors from quick actions on a card (status change, delete), which have no form to show them in.
+  const [actionError, setActionError] = useState<string | null>(null)
 
-  const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['jobs'],
-    queryFn: getJobs,
-  })
+  const jobsQuery = useQuery({ queryKey: ['jobs'], queryFn: getJobs })
+  const jobs = jobsQuery.data ?? []
+
+  const refreshJobs = () => queryClient.invalidateQueries({ queryKey: ['jobs'] })
 
   const createMutation = useMutation({
     mutationFn: createJob,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jobs'] })
-      setForm(emptyForm)
-      setIsFormOpen(false)
+      refreshJobs()
+      setIsCreating(false)
     },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, input }: { id: number; input: Partial<JobInput> }) => updateJob(id, input),
+    onSuccess: () => {
+      refreshJobs()
+      setEditingId(null)
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteJob,
+    onSuccess: refreshJobs,
+    onError: (error) => setActionError(getErrorMessage(error, 'Could not delete the job.')),
   })
 
   const logoutMutation = useMutation({
@@ -42,28 +53,36 @@ export default function Dashboard() {
     },
   })
 
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = event.target
-    setForm((current) => ({ ...current, [name]: value }))
+  const openCreateForm = () => {
+    createMutation.reset()
+    setEditingId(null)
+    setIsCreating((current) => !current)
   }
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-
-    await createMutation.mutateAsync({
-      title: form.title,
-      company: form.company,
-      location: form.location || undefined,
-      description: form.description || undefined,
-      url: form.url || undefined,
-    })
+  const openEditForm = (job: Job) => {
+    updateMutation.reset()
+    setIsCreating(false)
+    setEditingId(job.id)
   }
 
-  if (isLoading) {
-    return <div className="p-6 text-slate-700">Loading jobs...</div>
+  const changeStatus = (job: Job, status: Job['status']) => {
+    setActionError(null)
+    updateMutation.mutate(
+      { id: job.id, input: { status } },
+      { onError: (error) => setActionError(getErrorMessage(error, 'Could not change the status.')) },
+    )
   }
+
+  const removeJob = (job: Job) => {
+    if (!window.confirm(`Delete "${job.title}" at ${job.company}? This cannot be undone.`)) return
+
+    setActionError(null)
+    deleteMutation.mutate(job.id)
+  }
+
+  const isBusy = (job: Job) =>
+    (updateMutation.isLoading && updateMutation.variables?.id === job.id) ||
+    (deleteMutation.isLoading && deleteMutation.variables === job.id)
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -93,123 +112,61 @@ export default function Dashboard() {
 
           <button
             type="button"
-            onClick={() => setIsFormOpen((current) => !current)}
+            onClick={openCreateForm}
             className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
           >
-            {isFormOpen ? 'Close form' : 'Add job'}
+            {isCreating ? 'Close form' : 'Add job'}
           </button>
         </div>
 
-        {isFormOpen && (
-          <form onSubmit={handleSubmit} className="mb-8 rounded border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Title</label>
-                <input
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Company</label>
-                <input
-                  name="company"
-                  value={form.company}
-                  onChange={handleChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Location</label>
-                <input
-                  name="location"
-                  value={form.location}
-                  onChange={handleChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">URL</label>
-                <input
-                  name="url"
-                  value={form.url}
-                  onChange={handleChange}
-                  className="w-full rounded border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
-                  placeholder="https://example.com"
-                />
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <label className="mb-1 block text-sm font-medium text-slate-700">Description</label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full rounded border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
-              />
-            </div>
-
-            <div className="mt-4 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setIsFormOpen(false)}
-                className="rounded border border-slate-300 px-4 py-2 text-slate-700"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={createMutation.isLoading}
-                className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {createMutation.isLoading ? 'Saving...' : 'Save job'}
-              </button>
-            </div>
-          </form>
+        {isCreating && (
+          <div className="mb-8">
+            <JobForm
+              isSaving={createMutation.isLoading}
+              error={createMutation.isError ? getErrorMessage(createMutation.error, 'Could not save the job.') : null}
+              onSubmit={(values) => createMutation.mutate(values)}
+              onCancel={() => setIsCreating(false)}
+            />
+          </div>
         )}
 
-        {jobs.length === 0 ? (
+        {actionError && (
+          <div role="alert" className="mb-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{actionError}</div>
+        )}
+
+        {jobsQuery.isLoading ? (
+          <p className="text-slate-600">Loading jobs...</p>
+        ) : jobsQuery.isError ? (
+          <div role="alert" className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">
+            {getErrorMessage(jobsQuery.error, 'Could not load your jobs.')}
+          </div>
+        ) : jobs.length === 0 ? (
           <div className="rounded border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
             No jobs yet. Add your first opportunity to get started.
           </div>
         ) : (
           <div className="space-y-4">
-            {jobs.map((job) => (
-              <article key={job.id} className="rounded border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900">{job.title}</h3>
-                    <p className="text-sm text-slate-600">{job.company}</p>
-                  </div>
-
-                  {job.url && (
-                    <a
-                      href={job.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                    >
-                      View posting
-                    </a>
-                  )}
-                </div>
-
-                <div className="mt-3 space-y-2 text-sm text-slate-600">
-                  {job.location && <p>Location: {job.location}</p>}
-                  {job.description && <p>{job.description}</p>}
-                  <p>Added {new Date(job.createdAt).toLocaleDateString()}</p>
-                </div>
-              </article>
-            ))}
+            {jobs.map((job) =>
+              editingId === job.id ? (
+                <JobForm
+                  key={job.id}
+                  job={job}
+                  isSaving={updateMutation.isLoading}
+                  error={updateMutation.isError ? getErrorMessage(updateMutation.error, 'Could not save the changes.') : null}
+                  onSubmit={(values) => updateMutation.mutate({ id: job.id, input: values })}
+                  onCancel={() => setEditingId(null)}
+                />
+              ) : (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  isBusy={isBusy(job)}
+                  onStatusChange={(status) => changeStatus(job, status)}
+                  onEdit={() => openEditForm(job)}
+                  onDelete={() => removeJob(job)}
+                />
+              ),
+            )}
           </div>
         )}
       </main>
