@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   // url: used by the running app. On Neon this is the pooled connection.
   // directUrl: used by the Prisma CLI for migrations, which need a direct connection.
   url       = env("DATABASE_URL")
@@ -13,36 +13,42 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
   passwordHash String
   name         String?
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime @default(now())
 
-  jobs         Job[]
-  applications Application[]
+  jobs Job[]
+}
+
+enum JobStatus {
+  SAVED
+  APPLIED
+  INTERVIEWING
+  OFFER
+  REJECTED
+  ARCHIVED
 }
 
 model Job {
-  id          Int      @id @default(autoincrement())
-  title       String
-  company     String
-  location    String?
-  description String?
-  url         String?
-  createdBy   Int
-  createdAt   DateTime @default(now())
+  id              Int       @id @default(autoincrement())
+  title           String
+  company         String
+  location        String?
+  description     String?
+  url             String?
+  notes           String?
+  status          JobStatus @default(SAVED)
+  // Calendar date the application was sent; no time of day.
+  appliedAt       DateTime? @db.Date
+  createdBy       Int
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+  // Set whenever status changes, so time spent in each stage can be measured later.
+  statusChangedAt DateTime  @default(now())
 
-  user        User     @relation(fields: [createdBy], references: [id])
-}
+  user User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
 
-model Application {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  jobId     Int?
-  status    String   @default("saved")
-  notes     String?
-  createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id])
+  @@index([createdBy, status])
 }
