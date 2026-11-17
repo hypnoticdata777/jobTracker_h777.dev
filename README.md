@@ -71,7 +71,7 @@ Run all of these from the repository root.
 | `npm run db:deploy` | Apply committed migrations |
 | `npm run db:migrate` | Create a new migration after editing `schema.prisma` |
 | `npm run db:seed` | Reset the demo user and its sample jobs |
-| `npm run vercel-build` | What Vercel runs: apply migrations, then build |
+| `npm run vercel-build` | What Vercel runs: apply migrations (production deployments only), then build |
 
 ## Environment variables
 
@@ -101,7 +101,9 @@ share one origin and the session cookie needs no cross-site configuration.
 One Vercel project, with a Neon PostgreSQL database attached through the
 Vercel Marketplace. The Neon integration provides `DATABASE_URL` and
 `DATABASE_URL_UNPOOLED`; add `JWT_SECRET` by hand. Each deployment runs
-`npm run vercel-build`, which applies pending migrations and then builds.
+`npm run vercel-build`. Production deployments apply pending migrations and
+then build; preview deployments only build, because the database is connected
+to Production alone.
 
 ## API routes
 
