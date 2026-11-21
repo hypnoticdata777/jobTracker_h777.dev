@@ -2,7 +2,7 @@
 
 Aplicación web para organizar la búsqueda de empleo: guardar vacantes, registrar postulaciones y dar seguimiento a su estado, desde **Guardada** hasta **Oferta recibida** o **Rechazada**.
 
-También se utiliza como proyecto final escolar en México. La documentación y los textos de la interfaz están en español de México. Los identificadores técnicos, comandos y valores internos de la API conservan sus nombres para mantener la compatibilidad.
+También se utiliza como proyecto final escolar en México. Los identificadores técnicos, comandos y valores internos de la API conservan sus nombres para mantener la compatibilidad.
 
 ## Estado del proyecto
 
