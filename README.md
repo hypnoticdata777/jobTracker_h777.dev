@@ -4,6 +4,8 @@
 
 El proyecto está en desarrollo y también se utiliza como trabajo final escolar en México. Esta documentación presenta su propósito, sus avances y el plan para completarlo; no representa una entrega final del sistema terminado.
 
+Si encuentras una palabra técnica o una sigla nueva, el [glosario y guía de diseño](docs/glosario-y-diseno.md) explica su significado, el formato de los documentos y la tipografía de las pantallas.
+
 ## ¿Qué problema busca resolver?
 
 Al buscar empleo es común enviar varias solicitudes y guardar información en correos, notas o distintas páginas. Esto dificulta recordar a qué empresa se envió una solicitud, cuándo se hizo o qué ocurrió después.
@@ -35,11 +37,13 @@ Se comprobaron la instalación, la compilación, los tipos y los textos de las p
 
 | Etapa | Propósito | Situación actual |
 |---|---|---|
-| Base del proyecto (M0) | Organizar el código, la instalación y la base de datos | Implementada; falta repetir la inicialización completa de una base nueva |
-| Publicación en internet (M0.5) | Preparar el alojamiento de la aplicación | Configurada, con despliegue previo reportado; falta revisar su funcionamiento actual |
-| Funciones principales (M1) | Crear y administrar vacantes personales | Implementadas; falta comprobar el recorrido completo y la separación entre usuarios con datos reales |
-| Confiabilidad (M2) | Detectar errores y comprobar que los cambios no rompan la aplicación | Pendiente; es la siguiente etapa de desarrollo |
-| Demostración (M3) | Facilitar la consulta y preparar una explicación clara del producto | Pendiente; incluirá filtros, conteos y una demostración documentada |
+| Etapa 1 — Base del proyecto | Organizar el código, la instalación y la base de datos | Implementada; falta repetir la inicialización completa de una base nueva |
+| Etapa 2 — Funciones principales | Crear y administrar vacantes personales | Implementadas; falta comprobar el recorrido completo y la separación entre usuarios con datos reales |
+| Etapa 3 — Confiabilidad | Detectar errores y comprobar que los cambios no rompan la aplicación | Pendiente; es la siguiente etapa de desarrollo |
+| Etapa 4 — Publicación en internet | Preparar el alojamiento de la aplicación | Configurada, con despliegue previo reportado; falta revisar su funcionamiento actual |
+| Etapa 5 — Demostración | Facilitar la consulta y preparar una explicación clara del producto | Pendiente; incluirá filtros, conteos y una demostración documentada |
+
+Los números indican el orden de trabajo, no porcentajes de avance. Las claves antiguas con M significaban «milestone» (hito); su equivalencia está en el glosario.
 
 La adaptación al español ya se realizó y se mantendrá en las siguientes etapas. El [plan técnico](PLAN.md) contiene las tareas, evidencias y condiciones para dar por terminada cada etapa.
 
@@ -59,6 +63,8 @@ La aplicación tiene tres partes: una **interfaz**, que es lo que ve y utiliza l
 | Vite y Docker | Facilitan el trabajo local: Vite prepara la interfaz y Docker permite iniciar PostgreSQL con una configuración definida |
 | Vercel y Neon | Proporcionan alojamiento para la aplicación y PostgreSQL, respectivamente, para poder utilizarla desde internet |
 
+La [justificación detallada de tecnologías](docs/decisiones-tecnicas.md) explica qué necesidad resuelve cada una, dónde aparece en el código, qué funciones o propiedades utiliza y qué alternativa se consideraría. El [mapa del proyecto](docs/mapa-del-proyecto.md) sirve como directorio de carpetas, páginas y archivos.
+
 Estas elecciones permiten construir primero una versión pequeña y útil. Las pruebas pendientes servirán para comprobar su funcionamiento; utilizar estas herramientas por sí solo no garantiza que todo esté correcto.
 
 ## Alcance de la primera versión
@@ -69,7 +75,10 @@ Por ahora no se incluyen recomendaciones con inteligencia artificial, envío aut
 
 ## Para revisar o continuar el proyecto
 
-- [Plan técnico](PLAN.md): tareas pendientes, prioridades y criterios de aceptación.
+- [Plan técnico](PLAN.md): tareas, archivos afectados, preguntas previas, forma de trabajo y criterios de aceptación.
+- [Glosario y diseño](docs/glosario-y-diseno.md): vocabulario, siglas, formato y tipografía.
+- [Mapa del proyecto](docs/mapa-del-proyecto.md): qué contiene cada carpeta, por qué existe y cuándo modificarla.
+- [Justificación de tecnologías](docs/decisiones-tecnicas.md): argumentos técnicos con ejemplos del código.
 - [Guía técnica](docs/setup/guia-tecnica.md): requisitos, instalación, comandos y rutas de la API.
 - [Documentación de funcionalidades](docs/features): historias de usuario, diagramas y pruebas de escritorio.
 - [Bitácoras](docs/sessions): cambios realizados y comprobaciones de cada sesión.
