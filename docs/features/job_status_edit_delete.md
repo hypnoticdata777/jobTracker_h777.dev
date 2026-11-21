@@ -1,63 +1,64 @@
-# Feature: Job status, edit and delete
+# Funcionalidad: estados, edición y eliminación de vacantes
 
-1. User story
-As a job seeker, I want each job to have a status that I can change, and I want to edit or delete a job, so that the list shows where every application stands today.
+## 1. Historia de usuario
 
-Acceptance criteria:
-- Given a new job with no status, when I POST /api/jobs, then it is saved with status SAVED.
-- Given my own job, when I PATCH /api/jobs/:id with a new status, then the status changes and statusChangedAt is set to now.
-- Given my own job, when I PATCH other fields without changing status, then statusChangedAt does not change.
-- Given my own job, when I DELETE /api/jobs/:id, then it is removed and the server responds with 204.
-- Given a job that belongs to another user, when I PATCH or DELETE it, then the server responds with 404 and nothing changes.
-- Given a status that is not in the list, when I PATCH, then the server responds with 400.
-- Given an id that is not a positive integer, when I PATCH or DELETE, then the server responds with 404.
+Como persona que busca empleo, quiero cambiar el estado, editar o eliminar mis vacantes para mantener actualizado el seguimiento de mis postulaciones.
 
-Failure case included:
-- Given user B's session and the id of user A's job, PATCH responds with 404 and the job is unchanged.
+Criterios de aceptación:
+- Una vacante nueva sin estado explícito se guarda como `SAVED`.
+- `PATCH /api/jobs/:id` permite modificar una vacante propia; si cambia su estado, `statusChangedAt` se actualiza.
+- Editar otros campos sin cambiar el estado conserva `statusChangedAt`.
+- `DELETE /api/jobs/:id` elimina una vacante propia y responde 204.
+- Intentar editar o eliminar una vacante ajena produce 404 sin modificarla.
+- Un estado desconocido produce 400.
+- Un identificador que no sea entero positivo produce 404.
 
-Design decisions:
-- One model. The unused `Application` table is dropped and `Job` carries the status. In a personal tracker a job is the application.
-- Statuses: SAVED, APPLIED, INTERVIEWING, OFFER, REJECTED, ARCHIVED. Any status can move to any other; people correct mistakes.
-- Another user's job answers 404, not 403, so the API does not reveal that the id exists.
-- `statusChangedAt` is stored now because time-in-stage cannot be reconstructed later.
+Caso de error: el usuario B intenta modificar una vacante del usuario A; recibe 404 y el registro permanece igual.
 
-2. Pseudocode (PATCH /api/jobs/:id)
-- Confirm the request is authenticated
-- Parse the id from the path; if it is not a positive integer, return 404
-- Validate the body; every field is optional, at least one is required; on failure return 400
-- Find the job where id matches AND createdBy is the current user; if none, return 404
-- If the body has a status and it differs from the stored status, set statusChangedAt to now
-- Update the job and return 200 with the saved record
+Decisiones de diseño:
+- Un solo modelo `Job` representa la oportunidad y su seguimiento. La tabla `Application` sin uso fue eliminada.
+- Los estados internos son `SAVED`, `APPLIED`, `INTERVIEWING`, `OFFER`, `REJECTED` y `ARCHIVED`. Se muestran traducidos; se permite pasar entre cualesquiera de ellos para corregir errores.
+- Los registros ajenos responden 404 para no revelar su existencia.
+- `statusChangedAt` registra el último cambio; no representa un historial completo.
 
-3. Flowchart
+## 2. Pseudocódigo de actualización
+
+1. Comprobar la sesión.
+2. Leer el identificador; si no es entero positivo, responder 404.
+3. Validar los campos; exigir al menos uno o responder 400.
+4. Buscar por identificador y `createdBy` del usuario actual; si no existe, responder 404.
+5. Si cambia el estado, actualizar `statusChangedAt`.
+6. Guardar y responder 200 con la vacante actualizada.
+
+## 3. Diagrama de flujo
+
 ```mermaid
 flowchart TD
-  A[PATCH /api/jobs/:id] --> B{Authenticated?}
+  A[PATCH /api/jobs/:id] --> B{¿Sesión válida?}
   B -- No --> C[401]
-  B -- Yes --> D{id is a positive integer?}
+  B -- Sí --> D{¿Identificador válido?}
   D -- No --> E[404]
-  D -- Yes --> F{Body valid?}
+  D -- Sí --> F{¿Campos válidos?}
   F -- No --> G[400]
-  F -- Yes --> H[DB: find job where id AND createdBy = me]
-  H -- none --> E
-  H -- found --> I{status changed?}
-  I -- Yes --> J[set statusChangedAt = now]
-  I -- No --> K[keep statusChangedAt]
-  J --> L[DB: update]
+  F -- Sí --> H{¿Vacante propia?}
+  H -- No --> E
+  H -- Sí --> I{¿Cambió el estado?}
+  I -- Sí --> J[Actualizar statusChangedAt]
+  I -- No --> K[Conservar statusChangedAt]
+  J --> L[Guardar cambios]
   K --> L
-  L --> M[200 with job]
+  L --> M[200 con la vacante]
 ```
 
-4. Hand trace
-Inputs:
-- Happy path: user 1 owns job 7 with status SAVED; user 1 sends PATCH /api/jobs/7 with { "status": "APPLIED" }
-- Failure path: user 2 sends the same request
+## 4. Prueba de escritorio
 
-| Step | Line of pseudocode | Happy path (user 1) | Failure path (user 2) |
+| Paso | Operación | Caso correcto: usuario 1 | Caso de error: usuario 2 |
 |---|---|---|---|
-| 1 | Authenticated | req.user.id = 1 | req.user.id = 2 |
-| 2 | Parse id | 7 | 7 |
-| 3 | Validate body | { status: APPLIED } passes | { status: APPLIED } passes |
-| 4 | Find job where id = 7 AND createdBy = me | job 7 found, status SAVED | no row, return 404 |
-| 5 | Status changed? | SAVED to APPLIED, yes: statusChangedAt = now | not reached |
-| 6 | Update and return | 200 { id: 7, status: APPLIED, ... } | job 7 still SAVED |
+| 1 | Autenticar | `req.user.id = 1` | `req.user.id = 2` |
+| 2 | Leer identificador | Vacante 7 | Vacante 7 |
+| 3 | Validar cuerpo | `status: APPLIED` válido | Mismo estado válido |
+| 4 | Buscar por propietario | Vacante 7 de usuario 1, estado `SAVED` | No hay coincidencia: 404 |
+| 5 | Comparar estado | Cambia a `APPLIED`; actualizar fecha | No se ejecuta |
+| 6 | Guardar y responder | 200; se muestra «Postulada» | La vacante sigue como `SAVED` |
+
+Para eliminar se valida sesión e identificador, se ejecuta `deleteMany` filtrando también por propietario y se responde 204 si se eliminó un registro, o 404 si no hubo coincidencia.

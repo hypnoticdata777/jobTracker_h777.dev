@@ -1,61 +1,49 @@
-# Feature: Create Job
+# Funcionalidad: creación de vacantes
 
-1. User story
-As an authenticated user, I want to create a new job record, so that I can capture roles I am interested in and track them later.
+## 1. Historia de usuario
 
-Acceptance criteria:
-- Given an authenticated user and valid job details, when I POST /api/jobs, then the job is created and returns 201 with the saved record.
-- Given missing required fields (title or company), when I POST /api/jobs, then the server responds with 400.
-- Given an unauthenticated request, when I POST /api/jobs, then the server responds with 401.
-- Given a URL that is malformed, when I POST /api/jobs, then the server responds with 400.
-- Given an invalid request body, when I POST /api/jobs, then the server responds with 400.
+Como usuario autenticado, quiero guardar una vacante para registrar oportunidades laborales y dar seguimiento a mi búsqueda.
 
-Failure case included:
-- Given no auth cookie, the server rejects with 401.
+Criterios de aceptación:
+- `POST /api/jobs` con sesión y datos válidos responde 201 con la vacante creada.
+- Puesto (`title`) y empresa (`company`) son obligatorios; si faltan, responde 400.
+- Sin sesión, responde 401.
+- Un enlace inválido o distinto de HTTP(S) produce 400.
+- Los textos deben respetar los límites de longitud del esquema.
+- Sin estado explícito, se guarda como `SAVED` y se muestra «Guardada».
 
-2. Pseudocode
-- Confirm that the request is authenticated and req.user exists
-- Read body fields: title, company, location, description, url
-- Validate required fields and URL format
-- Create a job using the current user id as createdBy
-- Save it to the database
-- Return 201 with the created job object
+Caso de error: una solicitud sin cookie se rechaza con 401.
 
-3. Flowchart
+## 2. Pseudocódigo
+
+1. Comprobar que existe una sesión y `req.user` está disponible.
+2. Leer los datos de la vacante.
+3. Validar campos obligatorios, enlace, estado, fecha y límites de texto.
+4. Asociar `createdBy` con el usuario actual, nunca con un valor elegido por el cliente.
+5. Guardar en la base de datos.
+6. Responder 201 con el registro creado.
+
+## 3. Diagrama de flujo
+
 ```mermaid
 flowchart TD
-  A[POST /api/jobs] --> B[Auth middleware: req.user?]
-  B -- No --> C[401 Unauthorized]
-  B -- Yes --> D{Validate body}
-  D -- invalid --> E[400 Validation errors]
-  D -- valid --> F[DB: insert job with createdBy=req.user.id]
-  F --> G[201 Created { job }]
+  A[POST /api/jobs] --> B{¿Sesión válida?}
+  B -- No --> C[401]
+  B -- Sí --> D{¿Datos válidos?}
+  D -- No --> E[400: error de validación]
+  D -- Sí --> F[Guardar vacante con el usuario actual]
+  F --> G[201 con la vacante]
 ```
 
-4. Hand trace
-Inputs:
-- Happy path: title = ______, company = ______, userId = ______
-- Failure path: title = "", company = "Acme"
+## 4. Prueba de escritorio
 
-| Step | Line of pseudocode | Variable values | Output |
-|---|---:|---|---|
-| 1 | Auth middleware | req.cookies.auth_token -> userId | req.user |
-| 2 | Parse body | title, company, location | parsed object |
-| 3 | Validate | title, company | pass/fail |
-| 4 | Insert job | title, company, createdBy | job row |
-| 5 | Return | created record | 201 response |
+| Paso | Operación | Caso correcto | Caso de error |
+|---|---|---|---|
+| 1 | Autenticar | Usuario 42 | Usuario 42 |
+| 2 | Leer datos | `title: Desarrollador web`, `company: Acme` | `title: ""`, `company: Acme` |
+| 3 | Validar | Correcto | 400: el puesto es obligatorio |
+| 4 | Asociar usuario | `createdBy: 42` | No se ejecuta |
+| 5 | Guardar | Se crea la vacante 101 | No se ejecuta |
+| 6 | Responder | 201, `id: 101`, `status: SAVED` | Mensaje en español |
 
-<details>
-<summary>Answer key (happy path example)</summary>
-
-Example:
-- title = "Frontend Engineer", company = "Acme", userId = 42
-- Validation passes
-- DB insert creates row { id: 101, title: "Frontend Engineer", company: "Acme", createdBy: 42 }
-- Response -> 201 { id: 101, title: "Frontend Engineer", company: "Acme", createdBy: 42 }
-
-Failure:
-- title = ""
-- validation -> fail -> 400 { error: ["Title is required"] }
-
-</details>
+Otros campos disponibles: ubicación, descripción, enlace, notas, estado y fecha de postulación. Los nombres JSON permanecen en inglés por compatibilidad.

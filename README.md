@@ -1,129 +1,118 @@
-# Job Tracker (h777.dev)
+# Seguimiento de postulaciones — h777.dev
 
-A personal job-search tracker: record every role I apply to, move it through a
-pipeline (Saved → Applied → Interviewing → Offer / Rejected), and see at a
-glance where everything stands.
+Aplicación web para organizar la búsqueda de empleo: guardar vacantes, registrar postulaciones y dar seguimiento a su estado, desde **Guardada** hasta **Oferta recibida** o **Rechazada**.
 
-## Status
+También se utiliza como proyecto final escolar en México. La documentación y los textos de la interfaz están en español de México. Los identificadores técnicos, comandos y valores internos de la API conservan sus nombres para mantener la compatibilidad.
 
-M0 (green baseline), M0.5 (deployed on Vercel with Neon) and M1 (status, edit
-and delete) are complete. Next is M2: tests, CI and error handling. See
-[PLAN.md](PLAN.md).
+## Estado del proyecto
 
-## MVP 1 is done when
+La versión recibida marca como terminados M0 (base funcional), M0.5 (despliegue en Vercel con Neon) y M1 (estados, edición y eliminación). El siguiente hito es M2: pruebas, integración continua y manejo de errores. Consulta [PLAN.md](PLAN.md).
 
-- [x] A fresh clone installs, builds, migrates and seeds with the commands below.
-- [x] A user can register, log in, log out, add a job and see their own jobs.
-- [x] A job has a status, and the user can change it.
-- [x] A user can edit and delete a job.
-- [ ] The list can be grouped or filtered by status.
-- [ ] API tests cover auth, validation and isolation between users, and run in CI.
-- [x] The app is deployed at a public URL.
+Estas marcas reflejan el estado registrado por los trabajos anteriores; la [sesión de adaptación al español](docs/sessions/2026-11-21-espanol.md) detalla qué se comprobó nuevamente.
 
-## Stack
+## Criterios del producto mínimo viable (MVP 1)
 
-- Backend: TypeScript, Express 4, Prisma 5, PostgreSQL 15
-- Frontend: Vite, React 18, React Query 4, Tailwind
-- Auth: JWT in an httpOnly cookie, Argon2 password hashing
-- Validation: Zod
+- [x] Una copia nueva permite instalar, compilar, aplicar migraciones y cargar datos de demostración con los comandos indicados.
+- [x] Se puede crear una cuenta, iniciar y cerrar sesión, agregar vacantes y consultar las propias.
+- [x] Cada vacante tiene un estado modificable.
+- [x] Se pueden editar y eliminar vacantes.
+- [ ] Se puede agrupar o filtrar la lista por estado.
+- [ ] Las pruebas de API cubren autenticación, validación y aislamiento entre usuarios, y se ejecutan en integración continua.
+- [x] La aplicación está desplegada en una dirección pública.
 
-## Local setup
+## Tecnologías
 
-Requires Node 24 (`nvm use`), npm, and Docker for the database.
+- Servidor: TypeScript, Express 4, Prisma 5 y PostgreSQL 15.
+- Interfaz: Vite, React 18, React Query 4 y Tailwind.
+- Autenticación: JWT en una cookie `httpOnly`; contraseñas protegidas con Argon2.
+- Validación: Zod.
+
+## Instalación local
+
+Requisitos: Node 24 (`nvm use`), npm y Docker para la base de datos. Ejecuta desde la raíz:
 
 ```bash
 npm ci
-```
-
-```bash
 cp backend/.env.example backend/.env
-```
-
-```bash
 npm run db:up
-```
-
-```bash
 npm run db:deploy
-```
-
-```bash
 npm run db:seed
-```
-
-```bash
 npm run dev
 ```
 
-Open http://localhost:5173. Log in with the seeded account `demo@example.com` /
-`Passw0rd!` (override the password with `SEED_PASSWORD` when seeding).
+Abre http://localhost:5173. La cuenta de demostración es `demo@example.com` con contraseña `Passw0rd!`. Puedes definir `SEED_PASSWORD` al cargar los datos para cambiarla. La carga de datos reemplaza las vacantes de esa cuenta: úsala solo para demostración.
 
-## Commands
+## Comandos
 
-Run all of these from the repository root.
-
-| Command | What it does |
+| Comando | Función |
 |---|---|
-| `npm run dev` | Start the API and the frontend together |
-| `npm run build` | Production build of both workspaces |
-| `npm run typecheck` | Typecheck both workspaces without emitting files |
-| `npm run db:up` | Start PostgreSQL in Docker |
-| `npm run db:deploy` | Apply committed migrations |
-| `npm run db:migrate` | Create a new migration after editing `schema.prisma` |
-| `npm run db:seed` | Reset the demo user and its sample jobs |
-| `npm run vercel-build` | What Vercel runs: apply migrations (production deployments only), then build |
+| `npm run dev` | Inicia el servidor de la API y la interfaz |
+| `npm run build` | Compila ambos espacios de trabajo para producción |
+| `npm run typecheck` | Revisa los tipos sin generar archivos |
+| `npm run db:up` | Inicia PostgreSQL en Docker |
+| `npm run db:deploy` | Aplica las migraciones guardadas |
+| `npm run db:migrate` | Crea una migración después de modificar `schema.prisma` |
+| `npm run db:seed` | Restablece la cuenta y las vacantes de demostración |
+| `npm run vercel-build` | Aplica migraciones solo en producción y después compila |
 
-## Environment variables
+## Variables de entorno
 
-Set in `backend/.env` (see `backend/.env.example`).
+Se definen en `backend/.env`; consulta `backend/.env.example`.
 
-| Variable | Purpose |
+| Variable | Propósito |
 |---|---|
-| `DATABASE_URL` | PostgreSQL connection string used by the running app (pooled in production) |
-| `DATABASE_URL_UNPOOLED` | Direct PostgreSQL connection used by migrations; same as `DATABASE_URL` locally |
-| `JWT_SECRET` | Secret used to sign session tokens, at least 16 characters. The API refuses to start without it |
-| `JWT_EXPIRES_IN` | Token lifetime, default `7d` |
-| `PORT` | Local API port, default `4000` |
+| `DATABASE_URL` | Conexión a PostgreSQL para la aplicación; usa agrupación de conexiones en producción |
+| `DATABASE_URL_UNPOOLED` | Conexión directa para migraciones; localmente coincide con `DATABASE_URL` |
+| `JWT_SECRET` | Clave para firmar sesiones, con al menos 16 caracteres; es obligatoria |
+| `JWT_EXPIRES_IN` | Duración de la sesión; valor predeterminado: `7d` |
+| `PORT` | Puerto local de la API; valor predeterminado: `4000` |
 
-## How requests are routed
+No publiques archivos `.env` ni claves reales. En producción sustituye el valor de ejemplo de `JWT_SECRET` por una clave segura.
 
-The browser only ever calls relative `/api/...` paths, so the page and the API
-share one origin and the session cookie needs no cross-site configuration.
+## Arquitectura y recorrido de las solicitudes
 
-- **Local:** Vite serves the frontend on port 5173 and proxies `/api` to the
-  API on port 4000 (`frontend/vite.config.ts`).
-- **Vercel:** the built frontend is served as static files and `/api/*` is
-  rewritten to one function, `api/index.ts`, which runs the same Express app
-  (`vercel.json`).
+El navegador utiliza rutas relativas `/api/...`; interfaz y API comparten origen y no necesitan cookies entre sitios diferentes.
 
-## Deployment (Vercel + Neon)
+- **Local:** Vite sirve la interfaz en el puerto 5173 y reenvía `/api` al servidor del puerto 4000, según `frontend/vite.config.ts`.
+- **Vercel:** sirve la interfaz compilada como archivos estáticos y dirige `/api/*` a `api/index.ts`, que utiliza la misma aplicación Express, según `vercel.json`.
 
-One Vercel project, with a Neon PostgreSQL database attached through the
-Vercel Marketplace. The Neon integration provides `DATABASE_URL` and
-`DATABASE_URL_UNPOOLED`; add `JWT_SECRET` by hand. Each deployment runs
-`npm run vercel-build`. Production deployments apply pending migrations and
-then build; preview deployments only build, because the database is connected
-to Production alone.
+## Despliegue: Vercel y Neon
 
-## API routes
+Un proyecto de Vercel utiliza PostgreSQL de Neon conectado mediante su catálogo de integraciones. Neon proporciona `DATABASE_URL` y `DATABASE_URL_UNPOOLED`; `JWT_SECRET` debe configurarse por separado. Cada despliegue ejecuta `npm run vercel-build`. En producción se aplican migraciones pendientes y se compila; las vistas previas solo compilan, ya que la base está conectada únicamente al entorno de producción.
 
-| Method | Path | Auth | Purpose |
+## Rutas de la API
+
+| Método | Ruta | Requiere sesión | Función |
 |---|---|---|---|
-| GET | `/api/health` | no | Liveness check |
-| POST | `/api/auth/register` | no | Create an account |
-| POST | `/api/auth/login` | no | Log in and set the session cookie |
-| POST | `/api/auth/logout` | no | Clear the session cookie |
-| GET | `/api/auth/me` | yes | Current user |
-| GET | `/api/jobs` | yes | List the current user's jobs |
-| POST | `/api/jobs` | yes | Create a job |
-| PATCH | `/api/jobs/:id` | yes | Update any fields of one of the current user's jobs |
-| DELETE | `/api/jobs/:id` | yes | Delete one of the current user's jobs |
+| GET | `/api/health` | No | Comprueba que la API responde |
+| POST | `/api/auth/register` | No | Crea una cuenta |
+| POST | `/api/auth/login` | No | Inicia sesión y establece la cookie |
+| POST | `/api/auth/logout` | No | Elimina la cookie de sesión |
+| GET | `/api/auth/me` | Sí | Devuelve el usuario actual |
+| GET | `/api/jobs` | Sí | Lista las vacantes del usuario |
+| POST | `/api/jobs` | Sí | Crea una vacante |
+| PATCH | `/api/jobs/:id` | Sí | Actualiza una vacante propia |
+| DELETE | `/api/jobs/:id` | Sí | Elimina una vacante propia |
 
-A job's `status` is one of `SAVED`, `APPLIED`, `INTERVIEWING`, `OFFER`,
-`REJECTED` or `ARCHIVED`. A job that belongs to another user answers 404.
+Una vacante ajena responde con 404 para no revelar que existe.
 
-## Project docs
+## Vocabulario de estados
 
-- [PLAN.md](PLAN.md): milestones and what is deliberately not built yet
-- [docs/features](docs/features): per-feature stories and flowcharts
-- [docs/setup](docs/setup) and [docs/sessions](docs/sessions): record of the installation stabilization work
+| Valor interno | Etiqueta visible |
+|---|---|
+| `SAVED` | Guardada |
+| `APPLIED` | Postulada |
+| `INTERVIEWING` | En entrevista |
+| `OFFER` | Oferta recibida |
+| `REJECTED` | Rechazada |
+| `ARCHIVED` | Archivada |
+
+Las fechas visibles utilizan `es-MX`. Las fechas de postulación conservan su día de calendario mediante UTC.
+
+## Documentación
+
+- [Plan de trabajo](PLAN.md): hitos y funciones pospuestas.
+- [Funcionalidades](docs/features): historias de usuario, pseudocódigo, diagramas y pruebas de escritorio.
+- [Plan histórico de instalación](docs/setup/installation-plan.md).
+- [Bitácoras de sesiones](docs/sessions).
+- [Convenciones del proyecto](AGENTS.md): idioma y prácticas para futuros cambios.

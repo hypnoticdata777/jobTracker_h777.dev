@@ -1,68 +1,54 @@
-# Feature: Login
+# Funcionalidad: inicio de sesión
 
-1. User story
-As a registered user, I want to log in with my email and password, so that I can receive an httpOnly JWT cookie for secure site access.
+## 1. Historia de usuario
 
-Acceptance criteria:
-- Given valid credentials, when I POST /api/auth/login, then the server responds with 200 and sets an httpOnly cookie with the JWT.
-- Given an invalid email or password, when I POST /api/auth/login, then the server responds with 401 Unauthorized.
-- Given a malformed request body, when I POST /api/auth/login, then the server responds with 400.
-- Given a missing cookie on a protected route, when the route is accessed, then the server responds with 401.
+Como usuario registrado, quiero iniciar sesión con mi correo y contraseña para acceder a mis datos mediante una cookie JWT `httpOnly`.
 
-Failure case included:
-- Given a wrong password, the server responds with 401.
+Criterios de aceptación:
+- Con credenciales válidas, `POST /api/auth/login` responde 200 y establece la cookie JWT.
+- Con correo o contraseña incorrectos, responde 401.
+- Con un cuerpo inválido, responde 400.
+- Sin cookie, una ruta protegida responde 401.
 
-2. Pseudocode
-- Parse body: { email, password }
-- Validate required fields
-- Look up the user by email
-- If the user does not exist, return 401
-- Verify the password against the stored argon2 hash
-- If verification fails, return 401
-- Create a JWT with the user id and expiry
-- Set the JWT in an httpOnly cookie
-- Return 200 with the user summary without the password hash
+Caso de error: una contraseña incorrecta produce 401 con un mensaje en español.
 
-3. Flowchart
+## 2. Pseudocódigo
+
+1. Leer `{ email, password }` y validar los campos.
+2. Buscar al usuario por correo; si no existe, responder 401.
+3. Verificar la contraseña con el resumen criptográfico Argon2 almacenado.
+4. Si no coincide, responder 401.
+5. Crear un JWT con el identificador del usuario y su duración.
+6. Establecer la cookie `httpOnly`.
+7. Responder 200 con el usuario, sin incluir su contraseña ni su resumen criptográfico.
+
+## 3. Diagrama de flujo
+
 ```mermaid
 flowchart TD
-  A[POST /api/auth/login] --> B{Valid body?}
+  A[POST /api/auth/login] --> B{¿Cuerpo válido?}
   B -- No --> C[400]
-  B -- Yes --> D[DB: find user by email]
-  D -- not found --> E[401]
-  D -- found --> F[argon2.verify(hash, password)]
-  F -- false --> E[401]
-  F -- true --> G[Sign JWT]
-  G --> H[Set auth_token cookie]
-  H --> I[200 { id, email, name }]
+  B -- Sí --> D[Buscar usuario por correo]
+  D -- No existe --> E[401]
+  D -- Existe --> F{¿Contraseña correcta?}
+  F -- No --> E
+  F -- Sí --> G[Firmar JWT]
+  G --> H[Establecer cookie auth_token]
+  H --> I[200 con resumen del usuario]
 ```
 
-4. Hand trace
-Inputs:
-- Happy path: email = ______, password = ______
-- Failure path: email = "alice@example.com", password = "wrongpass"
+## 4. Prueba de escritorio
 
-| Step | Line of pseudocode | Variable values | Output |
-|---|---:|---|---|
-| 1 | Parse body | email=..., password=... | parsed object |
-| 2 | Find user by email | email | user / null |
-| 3 | Verify password | user.passwordHash, password | true/false |
-| 4 | Create JWT | user.id | token |
-| 5 | Set cookie | token | Set-Cookie header |
-| 6 | Return | user summary | 200 response |
+Entrada correcta: `email = bob@example.com`, `password = Secur3P@ss!`; existe el usuario 42 con esa contraseña.
+Entrada incorrecta: el mismo correo con `password = incorrecta`.
 
-<details>
-<summary>Answer key (happy path example)</summary>
+| Paso | Operación | Caso correcto | Caso de error |
+|---|---|---|---|
+| 1 | Validar campos | Formato válido | Formato válido |
+| 2 | Buscar usuario | Usuario 42 | Usuario 42 |
+| 3 | Verificar contraseña | Coincide | No coincide: 401 |
+| 4 | Crear JWT | Incluye `userId: 42` | No se ejecuta |
+| 5 | Establecer cookie | `auth_token`, `HttpOnly`, `SameSite=Lax` | No se ejecuta |
+| 6 | Responder | 200 con `id`, `email` y `name` | Correo o contraseña incorrectos |
 
-Example:
-- Input: email = "bob@example.com", password = "Secur3P@ss!"
-- DB returns user { id: 42, email: "bob@example.com", passwordHash: "$argon2id$..." }
-- argon2.verify -> true
-- signJWT -> "eyJ..."
-- Set-Cookie -> auth_token=eyJ...; HttpOnly; SameSite=Lax
-- Response -> 200 { id: 42, email: "bob@example.com", name: "Bob" }
-
-Failure:
-- Wrong password -> verify -> false -> 401 Unauthorized
-
-</details>
+El atributo `Secure` se activa en producción. Los ejemplos son datos ficticios.

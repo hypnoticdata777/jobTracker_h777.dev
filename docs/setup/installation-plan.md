@@ -1,53 +1,59 @@
-# Installation stabilization plan
+# Plan histórico de estabilización de la instalación
 
-## Goal
-Make a fresh checkout installable, buildable, and runnable before expanding product features. Complete phases in order; an installation passing does not establish that the app works end to end.
+## Objetivo
+Permitir instalar, compilar y ejecutar una copia nueva antes de ampliar las funcionalidades. Las fases se realizan en orden; instalar correctamente no demuestra el funcionamiento completo de la aplicación.
 
-## Phase 1 — reproducible dependency installation (completed)
-- Repair the backend package manifest (currently YAML inside a JSON file).
-- Resolve dependency declarations against imports and existing API usage.
-- Keep React Query v4 and use its supported mutation loading property.
-- Add a root npm lockfile and declare the validated Node/npm baseline.
-- Verify a fresh `npm ci` and Prisma client generation without a running database.
-- Record findings, commands, and remaining risks in a session log.
+Este documento conserva el plan de la sesión del 12 de noviembre de 2026. El [plan actual](../../PLAN.md) refleja los avances posteriores; las tareas descritas como pendientes aquí corresponden a ese momento histórico.
 
-Exit criteria met: all workspace manifests parse, clean installation succeeds using the lockfile, and Prisma client generation succeeds. See the [session record](../sessions/2026-11-12-installation-phase-1.md) for evidence.
+## Fase 1 — Instalación reproducible de dependencias (terminada)
 
-## Phase 2 — build and developer commands
-- Run backend and frontend production builds and repair compiler/configuration failures.
-- Add clear root development/build/typecheck commands and prevent generated output entering Git.
-- Verify the shared package exports and remove or repair unused scaffolding.
+- Corregir el manifiesto del servidor, que tenía contenido tipo YAML en un archivo JSON.
+- Comparar las dependencias declaradas con las importaciones y el uso de sus API.
+- Conservar React Query 4 y utilizar su propiedad de carga compatible.
+- Agregar el archivo de versiones fijas de npm y declarar la versión validada de Node/npm.
+- Comprobar `npm ci` y la generación del cliente Prisma sin una base de datos activa.
+- Registrar cambios, verificaciones y riesgos restantes.
 
-Exit criteria: both production builds pass from the documented setup.
+Criterio cumplido: los manifiestos se pueden interpretar como JSON, la instalación limpia funciona y Prisma genera su cliente. Consulta la [bitácora](../sessions/2026-11-12-installation-phase-1.md).
 
-## Phase 3 — database and runtime setup
-- Add an initial committed migration and a repeatable seed script.
-- Align environment examples and documentation with the actual files and commands.
-- Start PostgreSQL and the API; verify migrations, seed data, and health endpoint.
+## Fase 2 — Compilación y comandos de desarrollo
 
-Exit criteria: a fresh database can be initialized and the API starts using documented commands.
+- Compilar servidor e interfaz y corregir errores de TypeScript o configuración.
+- Agregar comandos raíz y evitar archivos generados dentro del control de versiones.
+- Verificar las exportaciones del paquete compartido o retirar su estructura sin uso.
 
-## Phase 4 — end-to-end MVP verification
-- Start the frontend and verify registration, login, session restoration, add/list jobs, and logout.
-- Check invalid input, unauthenticated access, and isolation between users.
-- Repair blocking auth/cache/error handling issues and document verified behavior.
+Criterio de aceptación: ambas compilaciones de producción funcionan con el procedimiento documentado.
 
-Exit criteria: the core user journey passes in a browser with meaningful API checks.
+## Fase 3 — Base de datos y ejecución
 
-## Phase 1 implementation notes (written before code)
+- Agregar una migración inicial y una carga repetible de datos de demostración.
+- Alinear los ejemplos de entorno y las instrucciones con los archivos reales.
+- Iniciar PostgreSQL y la API; verificar migraciones, datos y ruta de estado.
 
-User story: As a contributor, I can install every workspace from a clean checkout using a single lockfile.
+Criterio de aceptación: una base nueva puede inicializarse y la API arranca con los comandos documentados.
 
-Pseudocode:
-1. Parse workspace manifests and compare dependencies to imports.
-2. Repair malformed manifests and missing/incompatible declarations.
-3. Install from the root to resolve a single workspace dependency graph.
-4. Generate the Prisma client; retry installation with `npm ci`.
-5. Record actual results and defer build/runtime work to its phase.
+## Fase 4 — Verificación del recorrido completo
 
-Flow: inspect → repair declarations → install → generate client → clean install → document.
+- Probar registro, inicio de sesión, restauración de sesión, creación y listado de vacantes, y cierre de sesión.
+- Verificar entradas inválidas, acceso sin sesión y aislamiento entre usuarios.
+- Corregir problemas que bloqueen el recorrido y registrar las evidencias.
 
-Hand trace:
-- Before: backend manifest starts with `name:` → JSON parsing fails → workspace install cannot proceed.
-- After: backend manifest is a JSON object → npm resolves all three workspaces → lockfile records versions → `npm ci` installs that graph.
-- Failure path: unavailable package version → npm reports resolution failure → correct only the incompatible declaration and repeat validation.
+Criterio de aceptación: el recorrido principal funciona en el navegador y está respaldado por comprobaciones de la API.
+
+## Preparación de la fase 1, escrita antes de modificar código
+
+Historia de usuario: como colaborador, quiero instalar todos los espacios de trabajo desde una copia nueva utilizando un único archivo de versiones fijas.
+
+Pseudocódigo:
+1. Leer los manifiestos y comparar dependencias con importaciones.
+2. Reparar la sintaxis y las declaraciones ausentes o incompatibles.
+3. Instalar desde la raíz para resolver las dependencias del conjunto.
+4. Generar el cliente Prisma y repetir con `npm ci`.
+5. Registrar resultados y dejar compilación y ejecución para sus fases.
+
+Flujo: revisar → corregir declaraciones → instalar → generar cliente → instalación limpia → documentar.
+
+Prueba de escritorio:
+- Antes: el manifiesto empieza con `name:`; falla la lectura JSON y la instalación no puede continuar.
+- Después: el manifiesto es un objeto JSON; npm resuelve los tres espacios que existían entonces; el archivo de versiones permite repetir la instalación con `npm ci`.
+- Caso de error: una versión inexistente produce un error de resolución; se corrige la declaración correspondiente y se repite la comprobación.

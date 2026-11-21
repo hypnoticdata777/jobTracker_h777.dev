@@ -13,7 +13,7 @@ const STATUS_STYLES: Record<JobStatus, string> = {
 
 interface JobCardProps {
   job: Job
-  /** True while a change to this job is being saved or it is being deleted. */
+  /** Indica que se está guardando o eliminando esta vacante. */
   isBusy: boolean
   onStatusChange: (status: JobStatus) => void
   onEdit: () => void
@@ -30,7 +30,7 @@ export default function JobCard({ job, isBusy, onStatusChange, onEdit, onDelete 
         </div>
 
         <select
-          aria-label={`Status of ${job.title} at ${job.company}`}
+          aria-label={`Estado de ${job.title} en ${job.company}`}
           value={job.status}
           disabled={isBusy}
           onChange={(event) => onStatusChange(event.target.value as JobStatus)}
@@ -43,32 +43,32 @@ export default function JobCard({ job, isBusy, onStatusChange, onEdit, onDelete 
       </div>
 
       <div className="mt-3 space-y-2 text-sm text-slate-600">
-        {job.location && <p>Location: {job.location}</p>}
+        {job.location && <p>Ubicación: {job.location}</p>}
         {job.description && <p className="whitespace-pre-line">{job.description}</p>}
         {job.notes && (
           <p className="whitespace-pre-line rounded bg-slate-50 px-3 py-2">
-            <span className="font-medium text-slate-700">Notes: </span>
+            <span className="font-medium text-slate-700">Notas: </span>
             {job.notes}
           </p>
         )}
         <p className="text-slate-500">
-          {job.appliedAt ? `Applied ${formatCalendarDate(job.appliedAt)}` : 'Not applied yet'}
+          {job.appliedAt ? `Postulación: ${formatCalendarDate(job.appliedAt)}` : 'Sin postulación enviada'}
           {' · '}
-          Added {new Date(job.createdAt).toLocaleDateString()}
+          Agregada el {new Date(job.createdAt).toLocaleDateString('es-MX')}
         </p>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-4 text-sm font-medium">
         {job.url && (
           <a href={job.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-700">
-            View posting
+            Ver anuncio
           </a>
         )}
         <button type="button" onClick={onEdit} disabled={isBusy} className="text-slate-700 hover:text-slate-900 disabled:opacity-60">
-          Edit
+          Editar
         </button>
         <button type="button" onClick={onDelete} disabled={isBusy} className="text-red-600 hover:text-red-700 disabled:opacity-60">
-          Delete
+          Eliminar
         </button>
       </div>
     </article>

@@ -1,65 +1,50 @@
-# Feature: JWT-Protected Route
+# Funcionalidad: rutas protegidas mediante JWT
 
-1. User story
-As an authenticated user, I want the backend to validate my JWT on protected routes so that only logged-in users can access private data.
+## 1. Historia de usuario
 
-Acceptance criteria:
-- Given a valid JWT cookie, when I GET /api/auth/me, then the server responds with 200 and the user summary.
-- Given no cookie, when I GET /api/auth/me, then the server responds with 401 Unauthorized.
-- Given an expired or malformed token, when I GET /api/auth/me, then the server responds with 401.
-- Given a token for a user that no longer exists, when I GET /api/auth/me, then the server responds with 404.
+Como usuario autenticado, quiero que el servidor valide mi JWT en las rutas protegidas para que solo una sesión válida permita consultar datos privados.
 
-Failure case included:
-- Given an invalid JWT, the server rejects with 401.
+Criterios de aceptación:
+- Una cookie válida permite consultar `GET /api/auth/me` y recibir 200 con el usuario actual.
+- Sin cookie, con una sesión vencida o con un token inválido, responde 401.
+- Un token de un usuario que ya no existe produce 404.
 
-2. Pseudocode
-- Read the auth_token cookie from the request
-- If the cookie is missing, return 401
-- Verify the JWT using the app secret
-- If verification fails, return 401
-- Extract the userId from the token payload
-- Fetch the user record from the database by id
-- If the user does not exist, return 404
-- Attach the user to req.user and continue
-- Return the user summary from the protected route handler
+Caso de error: JWT inválido → 401 con mensaje en español.
 
-3. Flowchart
+## 2. Pseudocódigo
+
+1. Leer la cookie `auth_token`.
+2. Si falta, responder 401.
+3. Verificar firma y vencimiento con la clave de la aplicación.
+4. Si la verificación falla, responder 401.
+5. Extraer `userId` y buscar al usuario.
+6. Si no existe, responder 404.
+7. Agregar el usuario a `req.user` y continuar.
+8. Responder con el resumen del usuario desde la ruta protegida.
+
+## 3. Diagrama de flujo
+
 ```mermaid
 flowchart TD
-  A[Incoming request] --> B{Has auth_token cookie?}
-  B -- No --> C[401 Unauthorized]
-  B -- Yes --> D[Verify JWT]
-  D -- fail --> C[401 Unauthorized]
-  D -- ok --> E[Extract userId]
-  E --> F[DB: find user by id]
-  F -- not found --> G[404 Not Found]
-  F -- found --> H[Attach req.user]
-  H --> I[Return 200 + user summary]
+  A[Solicitud recibida] --> B{¿Existe cookie auth_token?}
+  B -- No --> C[401]
+  B -- Sí --> D{¿JWT válido?}
+  D -- No --> C
+  D -- Sí --> E[Extraer userId y buscar usuario]
+  E --> F{¿Existe usuario?}
+  F -- No --> G[404]
+  F -- Sí --> H[Asignar req.user]
+  H --> I[200 con usuario actual]
 ```
 
-4. Hand trace
-Inputs:
-- Happy path: cookie token = ______
-- Failure path: no cookie
+## 4. Prueba de escritorio
 
-| Step | Line of pseudocode | Variable values | Output |
-|---|---:|---|---|
-| 1 | Read cookie | req.cookies.auth_token | token or undefined |
-| 2 | Verify JWT | token | payload or error |
-| 3 | Find user by id | payload.userId | user / null |
-| 4 | Attach req.user | user | next() |
-| 5 | Return | req.user | 200 response |
+| Paso | Operación | Caso correcto | Caso de error |
+|---|---|---|---|
+| 1 | Leer cookie | Token válido | Sin cookie: 401 |
+| 2 | Verificar JWT | Contiene `userId: 42` | No se ejecuta |
+| 3 | Buscar usuario | Usuario 42 encontrado | No se ejecuta |
+| 4 | Asignar `req.user` | Datos públicos del usuario | No se ejecuta |
+| 5 | Responder | 200 con `id`, `email` y `name` | Debes iniciar sesión |
 
-<details>
-<summary>Answer key (happy path example)</summary>
-
-Example:
-- Cookie contains a valid token with payload { userId: 42 }
-- DB returns user { id: 42, email: "bob@example.com", name: "Bob" }
-- req.user is attached
-- Protected route returns 200 { id: 42, email: "bob@example.com", name: "Bob" }
-
-Failure:
-- no cookie -> 401 Unauthorized
-
-</details>
+Estos valores son ejemplos para la prueba de escritorio, no credenciales reales.

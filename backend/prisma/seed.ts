@@ -1,8 +1,7 @@
 import { PrismaClient, type Prisma } from '@prisma/client';
 import argon2 from 'argon2';
 
-// Creates one demo user with a few sample jobs.
-// Safe to run repeatedly: the user is upserted and their jobs are replaced.
+// Crea o actualiza una cuenta de demostración y reemplaza sus vacantes de ejemplo.
 const prisma = new PrismaClient();
 
 const DEMO_EMAIL = 'demo@example.com';
@@ -10,28 +9,28 @@ const DEMO_PASSWORD = process.env.SEED_PASSWORD ?? 'Passw0rd!';
 
 const sampleJobs: Omit<Prisma.JobCreateManyInput, 'createdBy'>[] = [
   {
-    title: 'Frontend Engineer',
+    title: 'Desarrollador de interfaces',
     company: 'Acme Corp',
-    location: 'Remote',
-    description: 'Build product UI in React and TypeScript.',
+    location: 'Remoto',
+    description: 'Desarrollar interfaces con React y TypeScript.',
     url: 'https://example.com/jobs/frontend-engineer',
     status: 'INTERVIEWING',
     appliedAt: new Date('2026-11-03T00:00:00.000Z'),
-    notes: 'Technical interview scheduled for next week.',
+    notes: 'Entrevista técnica programada para la próxima semana.',
   },
   {
-    title: 'Backend Developer',
+    title: 'Desarrollador de servidor',
     company: 'Globex',
-    location: 'Mexico City',
-    description: 'Node.js APIs backed by PostgreSQL.',
+    location: 'Ciudad de México',
+    description: 'Desarrollar API con Node.js y PostgreSQL.',
     url: 'https://example.com/jobs/backend-developer',
     status: 'APPLIED',
     appliedAt: new Date('2026-11-10T00:00:00.000Z'),
   },
   {
-    title: 'Full Stack Engineer',
+    title: 'Desarrollador de aplicaciones web',
     company: 'Initech',
-    location: 'Hybrid',
+    location: 'Híbrido',
     status: 'SAVED',
   },
 ];
@@ -41,8 +40,8 @@ async function main() {
 
   const user = await prisma.user.upsert({
     where: { email: DEMO_EMAIL },
-    update: { passwordHash, name: 'Demo User' },
-    create: { email: DEMO_EMAIL, passwordHash, name: 'Demo User' },
+    update: { passwordHash, name: 'Usuario de demostración' },
+    create: { email: DEMO_EMAIL, passwordHash, name: 'Usuario de demostración' },
   });
 
   await prisma.job.deleteMany({ where: { createdBy: user.id } });
@@ -50,7 +49,7 @@ async function main() {
     data: sampleJobs.map((job) => ({ ...job, createdBy: user.id })),
   });
 
-  console.log(`Seeded ${DEMO_EMAIL} with ${sampleJobs.length} jobs`);
+  console.log(`Cuenta ${DEMO_EMAIL} preparada con ${sampleJobs.length} vacantes de ejemplo`);
 }
 
 main()

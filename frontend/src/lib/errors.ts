@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 /**
- * Turns a failed request into text a person can read.
- * The API answers with { error: string } or { error: string[] }.
+ * Convierte errores de solicitudes en mensajes legibles.
+ * La API responde con { error: string } o { error: string[] }.
  */
 export function getErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
@@ -10,7 +10,7 @@ export function getErrorMessage(error: unknown, fallback: string): string {
 
     if (Array.isArray(message)) return message.join('. ')
     if (typeof message === 'string') return message
-    if (!error.response) return 'Could not reach the server. Check your connection and try again.'
+    if (!error.response) return 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.'
   }
 
   return fallback

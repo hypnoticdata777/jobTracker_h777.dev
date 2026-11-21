@@ -15,7 +15,7 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
   const token = req.cookies?.auth_token;
 
   if (!token) {
-    res.status(401).json({ error: 'Authentication required' });
+    res.status(401).json({ error: 'Debes iniciar sesión' });
     return;
   }
 
@@ -29,7 +29,7 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
       })
       .then((user) => {
         if (!user) {
-          res.status(404).json({ error: 'User not found' });
+          res.status(404).json({ error: 'Usuario no encontrado' });
           return;
         }
 
@@ -37,10 +37,10 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
         next();
       })
       .catch(() => {
-        res.status(401).json({ error: 'Invalid token' });
+        res.status(401).json({ error: 'Sesión inválida o vencida' });
       });
   } catch {
-    res.status(401).json({ error: 'Invalid token' });
+    res.status(401).json({ error: 'Sesión inválida o vencida' });
     return;
   }
 }

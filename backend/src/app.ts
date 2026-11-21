@@ -4,30 +4,29 @@ import './config/env';
 import { authRouter } from './routes/auth';
 import { jobsRouter } from './routes/jobs';
 
-// Builds the Express app without starting a server, so the same app can be
-// started locally (server.ts), mounted as a serverless function (api/index.ts)
-// or driven directly by tests.
+// Construye la aplicación sin iniciar el servidor, para reutilizarla
+// localmente, en funciones de Vercel o en pruebas.
 export const app = express();
 
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, message: 'Job Tracker API is running' });
+  res.json({ ok: true, message: 'La API de seguimiento de postulaciones está en funcionamiento' });
 });
 
 app.use('/api/auth', authRouter);
 app.use('/api/jobs', jobsRouter);
 
+// Las rutas desconocidas de la API también responden en español.
+app.use('/api', (_req, res) => {
+  res.status(404).json({ error: 'Ruta no encontrada' });
+});
+
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
 
-  if (err instanceof Error) {
-    res.status(500).json({ error: err.message });
-    return;
-  }
-
-  res.status(500).json({ error: 'Internal server error' });
+  res.status(500).json({ error: 'Error interno del servidor' });
 });
 
 export default app;

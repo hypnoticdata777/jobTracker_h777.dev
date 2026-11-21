@@ -29,7 +29,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     const existingUser = await prisma.user.findUnique({ where: { email } });
 
     if (existingUser) {
-      res.status(409).json({ error: 'User already exists' });
+      res.status(409).json({ error: 'Ya existe una cuenta con este correo electrónico' });
       return;
     }
 
@@ -47,7 +47,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     res.status(201).json(user);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Unable to register user' });
+    res.status(500).json({ error: 'No se pudo crear la cuenta' });
   }
 });
 
@@ -65,18 +65,18 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Correo electrónico o contraseña incorrectos' });
       return;
     }
 
     const passwordMatches = await argon2.verify(user.passwordHash, password);
 
     if (!passwordMatches) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Correo electrónico o contraseña incorrectos' });
       return;
     }
 
-    // JWT_EXPIRES_IN is a duration string such as '7d'; jsonwebtoken types it more narrowly than `string`.
+    // JWT_EXPIRES_IN es una duración como '7d'; jsonwebtoken exige un tipo más específico.
     const expiresIn = env.JWT_EXPIRES_IN as SignOptions['expiresIn'];
 
     const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, { expiresIn });
@@ -96,13 +96,13 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Unable to log in' });
+    res.status(500).json({ error: 'No se pudo iniciar sesión' });
   }
 });
 
 authRouter.post('/logout', (_req: Request, res: Response) => {
   res.clearCookie('auth_token');
-  res.status(200).json({ message: 'Logged out' });
+  res.status(200).json({ message: 'Sesión cerrada' });
 });
 
 authRouter.get('/me', requireAuth, (req: AuthenticatedRequest, res: Response) => {

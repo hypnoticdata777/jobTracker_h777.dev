@@ -19,7 +19,7 @@ function initialValues(job?: Job): JobInput {
 }
 
 interface JobFormProps {
-  /** When given, the form edits this job; otherwise it creates a new one. */
+  /** Si se recibe una vacante, el formulario la edita; de lo contrario, crea una. */
   job?: Job
   isSaving: boolean
   error: string | null
@@ -46,27 +46,27 @@ export default function JobForm({ job, isSaving, error, onSubmit, onCancel }: Jo
     <form onSubmit={handleSubmit} className="rounded border border-slate-200 bg-white p-4 shadow-sm">
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="job-title" className={labelClass}>Title</label>
+          <label htmlFor="job-title" className={labelClass}>Puesto</label>
           <input id="job-title" name="title" value={form.title} onChange={handleChange} className={inputClass} required maxLength={200} />
         </div>
 
         <div>
-          <label htmlFor="job-company" className={labelClass}>Company</label>
+          <label htmlFor="job-company" className={labelClass}>Empresa</label>
           <input id="job-company" name="company" value={form.company} onChange={handleChange} className={inputClass} required maxLength={200} />
         </div>
 
         <div>
-          <label htmlFor="job-location" className={labelClass}>Location</label>
+          <label htmlFor="job-location" className={labelClass}>Ubicación</label>
           <input id="job-location" name="location" value={form.location} onChange={handleChange} className={inputClass} maxLength={200} />
         </div>
 
         <div>
-          <label htmlFor="job-url" className={labelClass}>URL</label>
+          <label htmlFor="job-url" className={labelClass}>Enlace de la vacante</label>
           <input id="job-url" name="url" type="url" value={form.url} onChange={handleChange} className={inputClass} placeholder="https://example.com" />
         </div>
 
         <div>
-          <label htmlFor="job-status" className={labelClass}>Status</label>
+          <label htmlFor="job-status" className={labelClass}>Estado</label>
           <select id="job-status" name="status" value={form.status} onChange={handleChange} className={inputClass}>
             {JOB_STATUSES.map((status) => (
               <option key={status} value={status}>{STATUS_LABELS[status]}</option>
@@ -75,19 +75,19 @@ export default function JobForm({ job, isSaving, error, onSubmit, onCancel }: Jo
         </div>
 
         <div>
-          <label htmlFor="job-applied" className={labelClass}>Applied on</label>
+          <label htmlFor="job-applied" className={labelClass}>Fecha de postulación</label>
           <input id="job-applied" name="appliedAt" type="date" value={form.appliedAt} onChange={handleChange} className={inputClass} />
         </div>
       </div>
 
       <div className="mt-4">
-        <label htmlFor="job-description" className={labelClass}>Description</label>
+        <label htmlFor="job-description" className={labelClass}>Descripción</label>
         <textarea id="job-description" name="description" value={form.description} onChange={handleChange} rows={3} className={inputClass} maxLength={5000} />
       </div>
 
       <div className="mt-4">
-        <label htmlFor="job-notes" className={labelClass}>Notes</label>
-        <textarea id="job-notes" name="notes" value={form.notes} onChange={handleChange} rows={3} className={inputClass} maxLength={5000} placeholder="Contacts, follow-ups, next steps" />
+        <label htmlFor="job-notes" className={labelClass}>Notas</label>
+        <textarea id="job-notes" name="notes" value={form.notes} onChange={handleChange} rows={3} className={inputClass} maxLength={5000} placeholder="Contactos, seguimiento y próximos pasos" />
       </div>
 
       {error && (
@@ -96,14 +96,14 @@ export default function JobForm({ job, isSaving, error, onSubmit, onCancel }: Jo
 
       <div className="mt-4 flex justify-end gap-3">
         <button type="button" onClick={onCancel} className="rounded border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-100">
-          Cancel
+          Cancelar
         </button>
         <button
           type="submit"
           disabled={isSaving}
           className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSaving ? 'Saving...' : job ? 'Save changes' : 'Save job'}
+          {isSaving ? 'Guardando...' : job ? 'Guardar cambios' : 'Guardar vacante'}
         </button>
       </div>
     </form>

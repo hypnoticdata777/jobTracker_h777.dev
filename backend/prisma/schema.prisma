@@ -1,13 +1,13 @@
 generator client {
   provider      = "prisma-client-js"
-  // "native" is your own machine; the second target is the Linux runtime Vercel functions use.
+  // "native" corresponde al equipo local; el segundo destino es el entorno Linux de Vercel.
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
   provider  = "postgresql"
-  // url: used by the running app. On Neon this is the pooled connection.
-  // directUrl: used by the Prisma CLI for migrations, which need a direct connection.
+  // url: conexión de la aplicación; en Neon utiliza agrupación de conexiones.
+  // directUrl: conexión directa que Prisma utiliza para las migraciones.
   url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
@@ -40,12 +40,12 @@ model Job {
   url             String?
   notes           String?
   status          JobStatus @default(SAVED)
-  // Calendar date the application was sent; no time of day.
+  // Fecha de envío de la postulación, sin hora.
   appliedAt       DateTime? @db.Date
   createdBy       Int
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @default(now()) @updatedAt
-  // Set whenever status changes, so time spent in each stage can be measured later.
+  // Último cambio de estado, para medir después el tiempo en la etapa actual.
   statusChangedAt DateTime  @default(now())
 
   user User @relation(fields: [createdBy], references: [id], onDelete: Cascade)

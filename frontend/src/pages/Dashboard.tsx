@@ -15,7 +15,7 @@ export default function Dashboard() {
   const { user } = useAuth()
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
-  // Errors from quick actions on a card (status change, delete), which have no form to show them in.
+  // Errores de acciones de tarjeta que no tienen formulario propio.
   const [actionError, setActionError] = useState<string | null>(null)
 
   const jobsQuery = useQuery({ queryKey: ['jobs'], queryFn: getJobs })
@@ -42,7 +42,7 @@ export default function Dashboard() {
   const deleteMutation = useMutation({
     mutationFn: deleteJob,
     onSuccess: refreshJobs,
-    onError: (error) => setActionError(getErrorMessage(error, 'Could not delete the job.')),
+    onError: (error) => setActionError(getErrorMessage(error, 'No se pudo eliminar la vacante.')),
   })
 
   const logoutMutation = useMutation({
@@ -69,12 +69,12 @@ export default function Dashboard() {
     setActionError(null)
     updateMutation.mutate(
       { id: job.id, input: { status } },
-      { onError: (error) => setActionError(getErrorMessage(error, 'Could not change the status.')) },
+      { onError: (error) => setActionError(getErrorMessage(error, 'No se pudo cambiar el estado.')) },
     )
   }
 
   const removeJob = (job: Job) => {
-    if (!window.confirm(`Delete "${job.title}" at ${job.company}? This cannot be undone.`)) return
+    if (!window.confirm(`¿Eliminar "${job.title}" de ${job.company}? Esta acción no se puede deshacer.`)) return
 
     setActionError(null)
     deleteMutation.mutate(job.id)
@@ -89,8 +89,8 @@ export default function Dashboard() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Job Tracker</h1>
-            <p className="text-sm text-slate-500">Welcome, {user?.name || user?.email || 'friend'}</p>
+            <h1 className="text-xl font-bold text-slate-900">Seguimiento de postulaciones</h1>
+            <p className="text-sm text-slate-500">Hola, {user?.name || user?.email || 'te damos la bienvenida'}</p>
           </div>
 
           <button
@@ -98,7 +98,7 @@ export default function Dashboard() {
             onClick={() => logoutMutation.mutate()}
             className="rounded border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
           >
-            {logoutMutation.isLoading ? 'Logging out...' : 'Log out'}
+            {logoutMutation.isLoading ? 'Cerrando sesión...' : 'Cerrar sesión'}
           </button>
         </div>
       </header>
@@ -106,8 +106,8 @@ export default function Dashboard() {
       <main className="mx-auto max-w-5xl px-6 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Dashboard</h2>
-            <p className="text-sm text-slate-500">Your current job opportunities</p>
+            <h2 className="text-2xl font-bold text-slate-900">Mis postulaciones</h2>
+            <p className="text-sm text-slate-500">Da seguimiento a tus oportunidades laborales</p>
           </div>
 
           <button
@@ -115,7 +115,7 @@ export default function Dashboard() {
             onClick={openCreateForm}
             className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
           >
-            {isCreating ? 'Close form' : 'Add job'}
+            {isCreating ? 'Cerrar formulario' : 'Agregar vacante'}
           </button>
         </div>
 
@@ -123,7 +123,7 @@ export default function Dashboard() {
           <div className="mb-8">
             <JobForm
               isSaving={createMutation.isLoading}
-              error={createMutation.isError ? getErrorMessage(createMutation.error, 'Could not save the job.') : null}
+              error={createMutation.isError ? getErrorMessage(createMutation.error, 'No se pudo guardar la vacante.') : null}
               onSubmit={(values) => createMutation.mutate(values)}
               onCancel={() => setIsCreating(false)}
             />
@@ -135,14 +135,14 @@ export default function Dashboard() {
         )}
 
         {jobsQuery.isLoading ? (
-          <p className="text-slate-600">Loading jobs...</p>
+          <p className="text-slate-600">Cargando vacantes...</p>
         ) : jobsQuery.isError ? (
           <div role="alert" className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">
-            {getErrorMessage(jobsQuery.error, 'Could not load your jobs.')}
+            {getErrorMessage(jobsQuery.error, 'No se pudieron cargar tus vacantes.')}
           </div>
         ) : jobs.length === 0 ? (
           <div className="rounded border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
-            No jobs yet. Add your first opportunity to get started.
+            Aún no tienes vacantes. Agrega tu primera oportunidad para comenzar.
           </div>
         ) : (
           <div className="space-y-4">
@@ -152,7 +152,7 @@ export default function Dashboard() {
                   key={job.id}
                   job={job}
                   isSaving={updateMutation.isLoading}
-                  error={updateMutation.isError ? getErrorMessage(updateMutation.error, 'Could not save the changes.') : null}
+                  error={updateMutation.isError ? getErrorMessage(updateMutation.error, 'No se pudieron guardar los cambios.') : null}
                   onSubmit={(values) => updateMutation.mutate({ id: job.id, input: values })}
                   onCancel={() => setEditingId(null)}
                 />

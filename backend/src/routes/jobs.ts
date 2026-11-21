@@ -17,7 +17,7 @@ jobsRouter.get('/', async (req: AuthenticatedRequest, res: Response) => {
     res.status(200).json(jobs);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Unable to fetch jobs' });
+    res.status(500).json({ error: 'No se pudieron cargar las vacantes' });
   }
 });
 
@@ -37,7 +37,7 @@ jobsRouter.post('/', async (req: AuthenticatedRequest, res: Response) => {
     res.status(201).json(job);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Unable to create job' });
+    res.status(500).json({ error: 'No se pudo crear la vacante' });
   }
 });
 
@@ -46,7 +46,7 @@ jobsRouter.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
     const id = parseId(req.params.id);
 
     if (id === null) {
-      res.status(404).json({ error: 'Job not found' });
+      res.status(404).json({ error: 'Vacante no encontrada' });
       return;
     }
 
@@ -57,14 +57,13 @@ jobsRouter.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
-    // Ownership check: the row must match the id AND belong to the caller.
-    // Someone else's job answers 404, so the API does not reveal that it exists.
+    // Verificar identificador y propietario; responder 404 para no revelar registros ajenos.
     const existing = await prisma.job.findFirst({
       where: { id, createdBy: req.user!.id },
     });
 
     if (!existing) {
-      res.status(404).json({ error: 'Job not found' });
+      res.status(404).json({ error: 'Vacante no encontrada' });
       return;
     }
 
@@ -81,7 +80,7 @@ jobsRouter.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
     res.status(200).json(job);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Unable to update job' });
+    res.status(500).json({ error: 'No se pudo actualizar la vacante' });
   }
 });
 
@@ -90,23 +89,23 @@ jobsRouter.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
     const id = parseId(req.params.id);
 
     if (id === null) {
-      res.status(404).json({ error: 'Job not found' });
+      res.status(404).json({ error: 'Vacante no encontrada' });
       return;
     }
 
-    // deleteMany lets the owner filter sit in the same query as the delete.
+    // Incluir el propietario en la misma consulta que elimina el registro.
     const result = await prisma.job.deleteMany({
       where: { id, createdBy: req.user!.id },
     });
 
     if (result.count === 0) {
-      res.status(404).json({ error: 'Job not found' });
+      res.status(404).json({ error: 'Vacante no encontrada' });
       return;
     }
 
     res.status(204).end();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Unable to delete job' });
+    res.status(500).json({ error: 'No se pudo eliminar la vacante' });
   }
 });

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getErrorMessage } from '../lib/errors'
 import { registerUser } from '../services/authService'
 
 export default function RegisterPage() {
@@ -18,8 +19,8 @@ export default function RegisterPage() {
     try {
       await registerUser({ name, email, password })
       navigate('/login')
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Registration failed')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'No se pudo crear la cuenta'))
     } finally {
       setIsSubmitting(false)
     }
@@ -27,12 +28,13 @@ export default function RegisterPage() {
 
   return (
     <div className="mx-auto mt-20 max-w-md rounded border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="mb-6 text-2xl font-bold text-slate-900">Register</h1>
+      <h1 className="mb-6 text-2xl font-bold text-slate-900">Crear cuenta</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
+          <label htmlFor="register-name" className="mb-1 block text-sm font-medium text-slate-700">Nombre</label>
           <input
+            id="register-name"
             value={name}
             onChange={(event) => setName(event.target.value)}
             className="mt-1 block w-full rounded border border-slate-300 px-3 py-2 outline-none transition focus:border-green-500"
@@ -40,8 +42,9 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+          <label htmlFor="register-email" className="mb-1 block text-sm font-medium text-slate-700">Correo electrónico</label>
           <input
+            id="register-email"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -51,8 +54,9 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
+          <label htmlFor="register-password" className="mb-1 block text-sm font-medium text-slate-700">Contraseña</label>
           <input
+            id="register-password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -68,7 +72,7 @@ export default function RegisterPage() {
           disabled={isSubmitting}
           className="w-full rounded bg-green-600 px-4 py-2 font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Creating account...' : 'Register'}
+          {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
         </button>
       </form>
     </div>

@@ -1,71 +1,47 @@
-# Feature: Signup (Register)
+# Funcionalidad: registro de cuenta
 
-1. User story
-As a new user, I want to create an account with my email and password, so that I can store and manage my job applications securely.
+## 1. Historia de usuario
 
-Acceptance criteria:
-- Given a valid email and password, when I POST /api/auth/register, then a new user is created and a 201 response returns the user id and email (no password).
-- Given an email already in use, when I POST /api/auth/register, then I receive a 409 conflict with an appropriate error message.
-- Given an invalid password (too short), when I POST /api/auth/register, then I receive a 400 validation error.
-- Given malformed request body, when I POST /api/auth/register, then I receive a 400 error.
-- Given missing fields, when I POST /api/auth/register, then the server responds with a 400 listing missing fields.
+Como persona que busca empleo, quiero crear una cuenta con correo y contraseña para guardar y administrar mis postulaciones.
 
-Failure case included:
-- Given an email that already exists, the server rejects with 409.
+Criterios de aceptación:
+- Un correo válido y una contraseña de al menos ocho caracteres permiten crear una cuenta mediante `POST /api/auth/register`; responde 201 con datos del usuario, sin contraseña.
+- Un correo ya registrado produce 409.
+- Una contraseña demasiado corta, campos obligatorios ausentes o datos inválidos producen 400.
 
-2. Pseudocode
-- Parse body: { email, password, name? }
-- Validate email format and password length
-- Check if a user record exists for the email
-- If a user exists, return 409 conflict
-- Hash the password with argon2id
-- Save the user record to the database
-- Return a 201 response with id, email, and name only
+Caso de error: un correo ya utilizado se rechaza con 409 y un mensaje en español.
 
-3. Flowchart
+## 2. Pseudocódigo
+
+1. Leer `{ email, password, name? }`.
+2. Validar correo, longitud de contraseña y nombre opcional.
+3. Consultar si existe el correo; si existe, responder 409.
+4. Proteger la contraseña con Argon2id.
+5. Guardar el usuario en la base de datos.
+6. Responder 201 con sus datos públicos.
+
+## 3. Diagrama de flujo
+
 ```mermaid
 flowchart TD
-  A[POST /api/auth/register] --> B{Valid JSON?}
-  B -- No --> C[400 Bad Request]
-  B -- Yes --> D{Email valid and password strong?}
-  D -- No --> E[400 Validation Error]
-  D -- Yes --> F[DB: find user by email]
-  F -- exists --> G[409 Conflict]
-  F -- not exists --> H[Hash password with argon2id]
-  H --> I[DB: create user]
-  I --> J[201 Created { id, email, name }]
+  A[POST /api/auth/register] --> B{¿Campos válidos?}
+  B -- No --> C[400: error de validación]
+  B -- Sí --> D{¿El correo ya existe?}
+  D -- Sí --> E[409: cuenta existente]
+  D -- No --> F[Proteger contraseña con Argon2id]
+  F --> G[Crear usuario]
+  G --> H[201 con datos públicos]
 ```
 
-4. Hand trace
-Pick two concrete inputs:
-- Happy path: email = ______, password = ______, name = ______
-- Failure path: email = "alice@example.com", password = "short", name = "Alice"
+## 4. Prueba de escritorio
 
-| Step | Line of pseudocode | Variable values | Output |
-|---|---:|---|---|
-| 1 | Parse body | email=..., password=..., name=... | parsed object |
-| 2 | Validate | email, password | pass/fail |
-| 3 | Find user by email | email | userExists? |
-| 4 | Hash password | password | hash value |
-| 5 | Create user | email, hash, name | new user row |
-| 6 | Return | created user | 201 response |
+| Paso | Operación | Caso correcto | Caso de error |
+|---|---|---|---|
+| 1 | Leer entrada | `bob@example.com`, `Secur3P@ss!`, `Roberto` | Mismo correo, contraseña `corta` |
+| 2 | Validar | Correcto | 400: contraseña de menos de ocho caracteres |
+| 3 | Buscar correo | No existe | No se ejecuta |
+| 4 | Proteger contraseña | Se genera el resumen criptográfico | No se ejecuta |
+| 5 | Guardar | Nuevo usuario con `id: 42` | No se ejecuta |
+| 6 | Responder | 201 con `id`, `email` y `name` | Mensaje de validación en español |
 
-<details>
-<summary>Answer key (happy path example)</summary>
-
-Happy path example:
-- Input: email = "bob@example.com", password = "Secur3P@ss!", name = "Bob"
-
-Step outputs:
-1) parsed object -> { email: "bob@example.com", password: "Secur3P@ss!", name: "Bob" }
-2) validation -> pass
-3) find user -> no rows
-4) argon2.hash -> "$argon2id$..."
-5) insert -> DB row with id = 42
-6) response -> 201 { id: 42, email: "bob@example.com", name: "Bob" }
-
-Failure case:
-- email = "alice@example.com", password = "short"
-- validation -> fail -> 400 { error: ["Password must be at least 8 characters long"] }
-
-</details>
+Si el correo ya existe y la entrada es válida, el paso 3 responde 409. El problema previo del nombre enviado como cadena vacía sigue en el plan M2; traducir su mensaje no cambia esa regla.

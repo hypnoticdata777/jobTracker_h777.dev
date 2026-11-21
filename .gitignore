@@ -1,17 +1,17 @@
-# Environment files
+# Archivos de entorno
 .env
 .env.*
 !.env.example
 
-# Node dependencies
+# Dependencias de Node
 node_modules/
 
-# Build output
+# Archivos generados
 dist/
 
-# Logs
+# Registros
 npm-debug.log*
 
-# Editor files
+# Archivos del editor
 .vscode/
 .DS_Store

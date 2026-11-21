@@ -5,7 +5,7 @@ import useAuth from '../lib/useAuth'
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoading, user } = useAuth()
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return <div>Cargando...</div>
   if (!user) return <Navigate to="/login" replace />
 
   return <>{children}</>

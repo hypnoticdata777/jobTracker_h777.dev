@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getErrorMessage } from '../lib/errors'
 import { loginUser } from '../services/authService'
 
 export default function LoginPage() {
@@ -17,8 +18,8 @@ export default function LoginPage() {
     try {
       await loginUser({ email, password })
       navigate('/')
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Login failed')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'No se pudo iniciar sesión'))
     } finally {
       setIsSubmitting(false)
     }
@@ -26,12 +27,13 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto mt-20 max-w-md rounded border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="mb-6 text-2xl font-bold text-slate-900">Sign in</h1>
+      <h1 className="mb-6 text-2xl font-bold text-slate-900">Iniciar sesión</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+          <label htmlFor="login-email" className="mb-1 block text-sm font-medium text-slate-700">Correo electrónico</label>
           <input
+            id="login-email"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -41,8 +43,9 @@ export default function LoginPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
+          <label htmlFor="login-password" className="mb-1 block text-sm font-medium text-slate-700">Contraseña</label>
           <input
+            id="login-password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -58,7 +61,7 @@ export default function LoginPage() {
           disabled={isSubmitting}
           className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Signing in...' : 'Sign in'}
+          {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </button>
       </form>
     </div>

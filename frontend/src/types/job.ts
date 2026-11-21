@@ -3,12 +3,12 @@ export const JOB_STATUSES = ['SAVED', 'APPLIED', 'INTERVIEWING', 'OFFER', 'REJEC
 export type JobStatus = (typeof JOB_STATUSES)[number]
 
 export const STATUS_LABELS: Record<JobStatus, string> = {
-  SAVED: 'Saved',
-  APPLIED: 'Applied',
-  INTERVIEWING: 'Interviewing',
-  OFFER: 'Offer',
-  REJECTED: 'Rejected',
-  ARCHIVED: 'Archived',
+  SAVED: 'Guardada',
+  APPLIED: 'Postulada',
+  INTERVIEWING: 'En entrevista',
+  OFFER: 'Oferta recibida',
+  REJECTED: 'Rechazada',
+  ARCHIVED: 'Archivada',
 }
 
 export interface Job {
@@ -20,7 +20,7 @@ export interface Job {
   url: string | null
   notes: string | null
   status: JobStatus
-  /** ISO timestamp at UTC midnight; only the date part is meaningful. */
+  /** Fecha ISO a medianoche UTC; solo importa el día de calendario. */
   appliedAt: string | null
   createdBy: number
   createdAt: string
@@ -28,7 +28,7 @@ export interface Job {
   statusChangedAt: string
 }
 
-/** What the API accepts on create and update. Empty strings clear a field. */
+/** Datos aceptados al crear y editar; las cadenas vacías limpian los campos. */
 export interface JobInput {
   title: string
   company: string
@@ -37,6 +37,6 @@ export interface JobInput {
   url: string
   notes: string
   status: JobStatus
-  /** YYYY-MM-DD, or '' for no date. */
+  /** Formato AAAA-MM-DD, o '' cuando no hay fecha. */
   appliedAt: string
 }
