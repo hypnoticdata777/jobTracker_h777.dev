@@ -1,118 +1,77 @@
 # Seguimiento de postulaciones — h777.dev
 
-Aplicación web para organizar la búsqueda de empleo: guardar vacantes, registrar postulaciones y dar seguimiento a su estado, desde **Guardada** hasta **Oferta recibida** o **Rechazada**.
+**Una aplicación web para llevar el control de la búsqueda de empleo en un solo lugar.** Permite guardar vacantes, anotar información y consultar en qué etapa está cada postulación.
 
-También se utiliza como proyecto final escolar en México. Los identificadores técnicos, comandos y valores internos de la API conservan sus nombres para mantener la compatibilidad.
+El proyecto está en desarrollo y también se utiliza como trabajo final escolar en México. Esta documentación presenta su propósito, sus avances y el plan para completarlo; no representa una entrega final del sistema terminado.
 
-## Estado del proyecto
+## ¿Qué problema busca resolver?
 
-La versión recibida marca como terminados M0 (base funcional), M0.5 (despliegue en Vercel con Neon) y M1 (estados, edición y eliminación). El siguiente hito es M2: pruebas, integración continua y manejo de errores. Consulta [PLAN.md](PLAN.md).
+Al buscar empleo es común enviar varias solicitudes y guardar información en correos, notas o distintas páginas. Esto dificulta recordar a qué empresa se envió una solicitud, cuándo se hizo o qué ocurrió después.
 
-Estas marcas reflejan el estado registrado por los trabajos anteriores; la [sesión de adaptación al español](docs/sessions/2026-11-21-espanol.md) detalla qué se comprobó nuevamente.
+La propuesta es reunir esa información en una lista personal que se pueda mantener actualizada. Está dirigida a personas que buscan empleo, incluidos estudiantes que buscan sus primeras oportunidades laborales.
 
-## Criterios del producto mínimo viable (MVP 1)
+## Objetivo
 
-- [x] Una copia nueva permite instalar, compilar, aplicar migraciones y cargar datos de demostración con los comandos indicados.
-- [x] Se puede crear una cuenta, iniciar y cerrar sesión, agregar vacantes y consultar las propias.
-- [x] Cada vacante tiene un estado modificable.
-- [x] Se pueden editar y eliminar vacantes.
-- [ ] Se puede agrupar o filtrar la lista por estado.
-- [ ] Las pruebas de API cubren autenticación, validación y aislamiento entre usuarios, y se ejecutan en integración continua.
-- [x] La aplicación está desplegada en una dirección pública.
+Desarrollar una herramienta sencilla para registrar vacantes y dar seguimiento a las postulaciones de cada usuario. Como proyecto escolar, permite aplicar conocimientos de interfaces web, programación del servidor, bases de datos, autenticación y validación de información.
 
-## Tecnologías
+## ¿Cómo se utiliza?
 
-- Servidor: TypeScript, Express 4, Prisma 5 y PostgreSQL 15.
-- Interfaz: Vite, React 18, React Query 4 y Tailwind.
-- Autenticación: JWT en una cookie `httpOnly`; contraseñas protegidas con Argon2.
-- Validación: Zod.
+1. La persona crea una cuenta e inicia sesión.
+2. Agrega una vacante con el puesto, la empresa y, si lo necesita, el enlace, la ubicación y sus notas.
+3. Registra la fecha de postulación y actualiza su estado conforme avanza el proceso.
+4. Consulta, edita o elimina los registros de su lista.
 
-## Instalación local
+Por ejemplo: una persona guarda una vacante de desarrollo web, cambia su estado a **Postulada** cuando envía su solicitud y a **En entrevista** cuando recibe una invitación. Sus notas pueden contener temas que desea preparar para la entrevista.
 
-Requisitos: Node 24 (`nvm use`), npm y Docker para la base de datos. Ejecuta desde la raíz:
+Los estados disponibles son **Guardada, Postulada, En entrevista, Oferta recibida, Rechazada y Archivada**. Se pueden corregir en cualquier momento; no es obligatorio seguir una secuencia fija.
 
-```bash
-npm ci
-cp backend/.env.example backend/.env
-npm run db:up
-npm run db:deploy
-npm run db:seed
-npm run dev
-```
+## ¿Qué hay actualmente y qué falta?
 
-Abre http://localhost:5173. La cuenta de demostración es `demo@example.com` con contraseña `Passw0rd!`. Puedes definir `SEED_PASSWORD` al cargar los datos para cambiarla. La carga de datos reemplaza las vacantes de esa cuenta: úsala solo para demostración.
+El código ya incluye cuentas de usuario, inicio y cierre de sesión, registro de vacantes, edición, eliminación y cambios de estado. La interfaz y la documentación están en español de México.
 
-## Comandos
+Se comprobaron la instalación, la compilación, los tipos y los textos de las pantallas. Las comprobaciones recientes del navegador utilizaron respuestas simuladas: **todavía falta verificar el recorrido completo con una base de datos real y revisar el despliegue público**. Tener una función programada no significa que todas sus pruebas estén terminadas.
 
-| Comando | Función |
+## Plan para continuar
+
+| Etapa | Propósito | Situación actual |
+|---|---|---|
+| Base del proyecto (M0) | Organizar el código, la instalación y la base de datos | Implementada; falta repetir la inicialización completa de una base nueva |
+| Publicación en internet (M0.5) | Preparar el alojamiento de la aplicación | Configurada, con despliegue previo reportado; falta revisar su funcionamiento actual |
+| Funciones principales (M1) | Crear y administrar vacantes personales | Implementadas; falta comprobar el recorrido completo y la separación entre usuarios con datos reales |
+| Confiabilidad (M2) | Detectar errores y comprobar que los cambios no rompan la aplicación | Pendiente; es la siguiente etapa de desarrollo |
+| Demostración (M3) | Facilitar la consulta y preparar una explicación clara del producto | Pendiente; incluirá filtros, conteos y una demostración documentada |
+
+La adaptación al español ya se realizó y se mantendrá en las siguientes etapas. El [plan técnico](PLAN.md) contiene las tareas, evidencias y condiciones para dar por terminada cada etapa.
+
+## ¿Cómo funciona por dentro?
+
+La aplicación tiene tres partes: una **interfaz**, que es lo que ve y utiliza la persona; un **servidor**, que recibe sus solicitudes y aplica las reglas; y una **base de datos**, que guarda las cuentas y las vacantes. El servidor comprueba la sesión y qué registros pertenecen a cada usuario antes de permitir su acceso.
+
+## ¿Por qué se utilizan estas tecnologías?
+
+| Elección | Para qué sirve y por qué es útil aquí |
 |---|---|
-| `npm run dev` | Inicia el servidor de la API y la interfaz |
-| `npm run build` | Compila ambos espacios de trabajo para producción |
-| `npm run typecheck` | Revisa los tipos sin generar archivos |
-| `npm run db:up` | Inicia PostgreSQL en Docker |
-| `npm run db:deploy` | Aplica las migraciones guardadas |
-| `npm run db:migrate` | Crea una migración después de modificar `schema.prisma` |
-| `npm run db:seed` | Restablece la cuenta y las vacantes de demostración |
-| `npm run vercel-build` | Aplica migraciones solo en producción y después compila |
+| React, Tailwind y React Query | Construyen pantallas y formularios, dan estilo y mantienen la lista actualizada después de guardar cambios |
+| TypeScript | Ayuda a detectar inconsistencias en los datos durante el desarrollo, antes de ejecutar la aplicación |
+| Node.js y Express | Ejecutan el servidor y organizan las solicitudes de registro, sesión y vacantes usando el mismo lenguaje base que la interfaz |
+| PostgreSQL y Prisma | Guardan información relacionada —usuarios y sus vacantes— y permiten mantener la estructura de la base mediante cambios registrados |
+| Zod, Argon2 y JWT | Revisan los datos recibidos, protegen las contraseñas y permiten reconocer una sesión; cada herramienta cumple una función distinta |
+| Vite y Docker | Facilitan el trabajo local: Vite prepara la interfaz y Docker permite iniciar PostgreSQL con una configuración definida |
+| Vercel y Neon | Proporcionan alojamiento para la aplicación y PostgreSQL, respectivamente, para poder utilizarla desde internet |
 
-## Variables de entorno
+Estas elecciones permiten construir primero una versión pequeña y útil. Las pruebas pendientes servirán para comprobar su funcionamiento; utilizar estas herramientas por sí solo no garantiza que todo esté correcto.
 
-Se definen en `backend/.env`; consulta `backend/.env.example`.
+## Alcance de la primera versión
 
-| Variable | Propósito |
-|---|---|
-| `DATABASE_URL` | Conexión a PostgreSQL para la aplicación; usa agrupación de conexiones en producción |
-| `DATABASE_URL_UNPOOLED` | Conexión directa para migraciones; localmente coincide con `DATABASE_URL` |
-| `JWT_SECRET` | Clave para firmar sesiones, con al menos 16 caracteres; es obligatoria |
-| `JWT_EXPIRES_IN` | Duración de la sesión; valor predeterminado: `7d` |
-| `PORT` | Puerto local de la API; valor predeterminado: `4000` |
+La prioridad es completar y comprobar el registro de cuentas y el seguimiento manual de vacantes. Después se añadirán filtros por estado y conteos para facilitar la consulta.
 
-No publiques archivos `.env` ni claves reales. En producción sustituye el valor de ejemplo de `JWT_SECRET` por una clave segura.
+Por ahora no se incluyen recomendaciones con inteligencia artificial, envío automático de solicitudes, gestión completa de entrevistas ni integración con bolsas de trabajo. Esas funciones aumentarían el alcance antes de validar la utilidad de la herramienta principal.
 
-## Arquitectura y recorrido de las solicitudes
+## Para revisar o continuar el proyecto
 
-El navegador utiliza rutas relativas `/api/...`; interfaz y API comparten origen y no necesitan cookies entre sitios diferentes.
+- [Plan técnico](PLAN.md): tareas pendientes, prioridades y criterios de aceptación.
+- [Guía técnica](docs/setup/guia-tecnica.md): requisitos, instalación, comandos y rutas de la API.
+- [Documentación de funcionalidades](docs/features): historias de usuario, diagramas y pruebas de escritorio.
+- [Bitácoras](docs/sessions): cambios realizados y comprobaciones de cada sesión.
 
-- **Local:** Vite sirve la interfaz en el puerto 5173 y reenvía `/api` al servidor del puerto 4000, según `frontend/vite.config.ts`.
-- **Vercel:** sirve la interfaz compilada como archivos estáticos y dirige `/api/*` a `api/index.ts`, que utiliza la misma aplicación Express, según `vercel.json`.
-
-## Despliegue: Vercel y Neon
-
-Un proyecto de Vercel utiliza PostgreSQL de Neon conectado mediante su catálogo de integraciones. Neon proporciona `DATABASE_URL` y `DATABASE_URL_UNPOOLED`; `JWT_SECRET` debe configurarse por separado. Cada despliegue ejecuta `npm run vercel-build`. En producción se aplican migraciones pendientes y se compila; las vistas previas solo compilan, ya que la base está conectada únicamente al entorno de producción.
-
-## Rutas de la API
-
-| Método | Ruta | Requiere sesión | Función |
-|---|---|---|---|
-| GET | `/api/health` | No | Comprueba que la API responde |
-| POST | `/api/auth/register` | No | Crea una cuenta |
-| POST | `/api/auth/login` | No | Inicia sesión y establece la cookie |
-| POST | `/api/auth/logout` | No | Elimina la cookie de sesión |
-| GET | `/api/auth/me` | Sí | Devuelve el usuario actual |
-| GET | `/api/jobs` | Sí | Lista las vacantes del usuario |
-| POST | `/api/jobs` | Sí | Crea una vacante |
-| PATCH | `/api/jobs/:id` | Sí | Actualiza una vacante propia |
-| DELETE | `/api/jobs/:id` | Sí | Elimina una vacante propia |
-
-Una vacante ajena responde con 404 para no revelar que existe.
-
-## Vocabulario de estados
-
-| Valor interno | Etiqueta visible |
-|---|---|
-| `SAVED` | Guardada |
-| `APPLIED` | Postulada |
-| `INTERVIEWING` | En entrevista |
-| `OFFER` | Oferta recibida |
-| `REJECTED` | Rechazada |
-| `ARCHIVED` | Archivada |
-
-Las fechas visibles utilizan `es-MX`. Las fechas de postulación conservan su día de calendario mediante UTC.
-
-## Documentación
-
-- [Plan de trabajo](PLAN.md): hitos y funciones pospuestas.
-- [Funcionalidades](docs/features): historias de usuario, pseudocódigo, diagramas y pruebas de escritorio.
-- [Plan histórico de instalación](docs/setup/installation-plan.md).
-- [Bitácoras de sesiones](docs/sessions).
-- [Convenciones del proyecto](AGENTS.md): idioma y prácticas para futuros cambios.
+Para una exposición breve: **«Mi proyecto es una aplicación web para organizar la búsqueda de empleo. Ya tiene las funciones principales de registro y seguimiento de vacantes. El siguiente paso es comprobar el recorrido completo, automatizar las pruebas y mejorar la consulta antes de presentar la versión terminada».**
